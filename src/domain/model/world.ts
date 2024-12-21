@@ -8,8 +8,8 @@ import {randomInt} from "../utils/random";
 export class World {
     private readonly chunkGenerator: ChunkGenerator
     private readonly chunks: Map<string, Chunk> = new Map();
-    private pokemons: Pokemon[] = [];
-    private center: Position = {x: 0, y: 0};
+    private readonly pokemons: Pokemon[] = [];
+    center: Position = {x: 0, y: 0};
 
     constructor(
         private readonly chunkSize: number,
@@ -21,33 +21,37 @@ export class World {
         this.chunkGenerator = new ChunkGenerator(chunkSize, 1, config);
     }
 
-    update() {
-        const result = {
-            added: [] as Pokemon[],
-            removed: [] as Pokemon[],
-        }
+    addPokemon() {
+        const added: Pokemon[] = [];
         if (this.pokemons.length < 100) {
-            const randomPosition = randomInt(-1000, 1000);
+            const randomPosition = randomInt(-2000, 2000);
             const position = {x: this.center.x + randomPosition(), y: this.center.y + randomPosition()};
-            result.added.push(this.generatePokemonAt(position));
+            const pokemon = this.generatePokemonAt(position)
+            added.push(pokemon);
+            this.pokemons.push(...added);
         }
+        return added;
+    }
 
+    update() {
         for (const pokemon of this.pokemons) {
             pokemon.act();
         }
-
-        this.removePokemons();
-
-        return result;
     }
 
-    private removePokemons = () => {
-        this.pokemons = this.pokemons.filter((pokemon) => {
+    removePokemons = () => {
+        const pokemonsToRemove = this.pokemons.filter((pokemon) => {
             const dx = pokemon.position.x - this.center.x;
             const dy = pokemon.position.y - this.center.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            return (distance <= 2000)
+            return (distance > 2000)
         })
+
+        pokemonsToRemove.forEach((pokemon) => {
+            this.pokemons.splice(this.pokemons.indexOf(pokemon), 1);
+        })
+
+        return pokemonsToRemove;
     }
 
     private getChunkPosition(position: Position) {
@@ -66,8 +70,8 @@ export class World {
         return chunks.get(key);
     }
 
-    * getVisibleChunks(center: Position) {
-        const {loadingDistance} = this;
+    * getVisibleChunks() {
+        const {center, loadingDistance} = this;
         const {n, m} = this.getChunkPosition(center);
 
         for (let i = -loadingDistance; i <= loadingDistance; i++) {
@@ -85,7 +89,6 @@ export class World {
         const chunkY = Math.floor((position.y - m * factor) / this.tileSize)
         const biome = chunk.getTileAt(chunkX, chunkY);
         const pokemonData = this.pokedex.generateRandomPokemon(biome);
-        console.log(pokemonData)
         return new Pokemon(position, 0, 1, pokemonData)
     }
 }

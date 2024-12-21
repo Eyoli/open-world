@@ -1,21 +1,19 @@
 import {Application, Container, ContainerChild, Graphics, Sprite, Texture} from "pixi.js";
 import {Item} from "../../domain/model/item";
 import {World} from "../../domain/model/world";
-import {Position} from "../../domain/model/types";
 import {createAdminViewport} from "./controls";
 import {Viewport} from "pixi-viewport";
 import {createPokemonSprite, PokemonSprite} from "./pokemon";
-import {randomInt} from "../../domain/utils/random";
-import {createTicker} from "./common/ticker";
+import {Pokemon} from "../../domain/model/pokemon";
+import {Chunk} from "../../domain/model/chunk";
 
 export class WorldContainer {
     private readonly container: Container<ContainerChild>;
-    private readonly background: Container<ContainerChild>;
-    private readonly items: Container<ContainerChild>;
-    private pokemons: PokemonSprite[] = [];
+    private readonly backgroundLayer: Container<ContainerChild>;
+    private readonly itemLayer: Container<ContainerChild>;
+    private readonly pokemonLayer: Container<PokemonSprite>;
+    private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
-
-    private center: Position = {x: 0, y: 0};
 
     constructor(
         private readonly app: Application,
@@ -27,11 +25,14 @@ export class WorldContainer {
             // this will make moving this container GPU powered
             isRenderGroup: true,
         });
-        this.background = new Container();
-        this.container.addChild(this.background);
+        this.backgroundLayer = new Container({interactiveChildren: false});
+        this.container.addChild(this.backgroundLayer);
 
-        this.items = new Container();
-        this.container.addChild(this.items);
+        this.itemLayer = new Container();
+        this.container.addChild(this.itemLayer);
+
+        this.pokemonLayer = new Container();
+        this.container.addChild(this.pokemonLayer);
 
         this.viewport = createAdminViewport(app, width, height);
         app.stage.addChild(this.viewport);
@@ -41,82 +42,83 @@ export class WorldContainer {
     render = () => {
         const {world} = this;
 
-        this.renderChunks(world, this.center)
+        this.renderChunks()
 
         this.viewport.on('pointerdown', (event) => {
             const position = {x: event.x, y: event.y};
-            this.center = this.viewport.toWorld(position);
-            console.log("click", this.center);
-            this.background.children.forEach((child) => {
-                child.destroy({children: true});
-            })
-            this.background.removeChildren();
-            this.items.removeChildren();
-            this.renderChunks(world, this.center)
-        });
+            world.center = this.viewport.toWorld(position);
+            console.log("Set center at", world.center);
 
-        this.app.ticker.add(createTicker(1000 / 30, this.runEachFrame));
+            this.backgroundLayer.children.forEach((child) => {
+                child.destroy({children: true, context: true, texture: true});
+            })
+            this.backgroundLayer.removeChildren();
+
+            this.itemLayer.children.forEach((child) => {
+                child.destroy({children: true, context: true, texture: true});
+            })
+            this.itemLayer.removeChildren();
+            this.renderChunks()
+        });
     }
 
-    private runEachFrame = () => {
+    runEachFrame = () => {
         const {world} = this;
 
-        if (this.pokemons.length < 100) {
-            const randomPosition = randomInt(-2000, 2000);
-            const position = {x: this.center.x + randomPosition(), y: this.center.y + randomPosition()};
-            const pokemon = world.generatePokemonAt(position);
+        for (const pokemon of world.addPokemon()) {
             const pokemonSprite = createPokemonSprite(pokemon);
-            this.pokemons.push(pokemonSprite);
-            pokemonSprite.sprites.forEach((sprite) => {
-                this.items.addChild(sprite);
-            });
+            this.pokemons.set(pokemon, pokemonSprite);
+            this.pokemonLayer.addChild(pokemonSprite);
         }
 
-        this.filterPokemons();
+        world.update()
 
-        for (const pokemon of this.pokemons) {
-            pokemon.update();
+        world.removePokemons().forEach((pokemon) => {
+            const pokemonSprite = this.pokemons.get(pokemon);
+            this.pokemons.delete(pokemon);
+            this.pokemonLayer.removeChild(pokemonSprite);
+        })
+
+        for (const [_, pokemonSprite] of this.pokemons) {
+            pokemonSprite.update();
         }
     }
 
-    private renderChunks(world: World, position: Position) {
-        for (const chunk of world.getVisibleChunks(position)) {
-            const itemsContainer = new Container();
-            const graphics = new Graphics();
+    private renderChunkBackground(chunk: Chunk) {
+        const {world} = this;
 
-            const offsetX = chunk.n * chunk.size * world.tileSize;
-            const offsetY = chunk.m * chunk.size * world.tileSize;
-            for (const {x, y, biome} of chunk.enumerateTiles()) {
-                graphics.rect(offsetX + x * world.tileSize, offsetY + y * world.tileSize, world.tileSize, world.tileSize);
-                graphics.fill(biome.color);
-            }
+        const graphics = new Graphics();
+
+        const offsetX = chunk.n * chunk.size * world.tileSize;
+        const offsetY = chunk.m * chunk.size * world.tileSize;
+        for (const {x, y, biome} of chunk.enumerateTiles()) {
+            graphics.rect(offsetX + x * world.tileSize, offsetY + y * world.tileSize, world.tileSize, world.tileSize);
+            graphics.fill(biome.color);
+        }
+
+        return graphics;
+    }
+
+    private renderChunks() {
+        const {world} = this;
+
+        for (const chunk of world.getVisibleChunks()) {
+            const itemsContainer = new Container();
 
             for (const item of chunk.items) {
                 const itemView = createItemView(item, world);
                 itemsContainer.addChild(itemView);
             }
 
-            this.background.addChild(graphics);
-            this.items.addChild(itemsContainer);
+            this.backgroundLayer.addChild(this.renderChunkBackground(chunk));
+            this.itemLayer.addChild(itemsContainer);
 
-            this.filterPokemons();
-            this.pokemons.forEach(({sprites}) => {
-                sprites.forEach((sprite) => {
-                    this.items.addChild(sprite);
-                });
-            });
+            for (const pokemonSprite of this.pokemons.values()) {
+                this.pokemonLayer.addChild(pokemonSprite);
+            }
         }
 
-        this.items.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
-    }
-
-    private filterPokemons = () => {
-        this.pokemons = this.pokemons.filter(({pokemon}) => {
-            const dx = pokemon.position.x - this.center.x;
-            const dy = pokemon.position.y - this.center.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            return (distance <= 2000)
-        })
+        this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
     }
 }
 

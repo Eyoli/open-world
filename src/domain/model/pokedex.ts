@@ -1,16 +1,18 @@
 import {csv} from 'd3-fetch'
 import {BiomeConfig} from "./biomes";
 import {randomInt} from "../utils/random";
-import {Pokemon as SmogonPokemon} from "@smogon/calc";
+import {Generations, MOVES, Pokemon as SmogonPokemon} from "@smogon/calc";
 import {Pokemon} from "./pokemon";
+import {Moves} from "@smogon/calc/dist/data/moves";
 
-const POKEMON_GEN = 9
+const POKEMON_GEN = Generations.get(9)
 
 const randomPokemonId = randomInt(1, 493)
 
 export type PokemonData = {
     id: number,
-    data: SmogonPokemon
+    generalData: any,
+    battleData: SmogonPokemon
 }
 
 export class Pokedex {
@@ -18,6 +20,7 @@ export class Pokedex {
         private readonly data: Map<string, any>
     ) {
         this.data = data
+        console.log(Array.from(POKEMON_GEN.moves))
     }
 
     get(id: number) {
@@ -31,9 +34,11 @@ export class Pokedex {
         const id = config?.id || randomPokemonId()
         const pokedexEntry = this.get(id)
         const pokemonData = new SmogonPokemon(POKEMON_GEN, pokedexEntry["Pokemon"]);
+        //calculate(POKEMON_GEN, pokemonData, pokemonData, )
         return {
             id,
-            data: pokemonData
+            generalData: pokedexEntry,
+            battleData: pokemonData
         }
     }
 }

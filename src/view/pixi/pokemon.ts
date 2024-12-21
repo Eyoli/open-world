@@ -1,20 +1,27 @@
 import {Pokemon} from "../../domain/model/pokemon";
-import {AnimatedSprite, Texture} from "pixi.js";
+import {AnimatedSprite, Container, Graphics, Texture} from "pixi.js";
 import {Direction} from "../../domain/model/types";
+import {loadTextures} from "./common/texture";
 
-export class PokemonSprite {
+export class PokemonSprite extends Container {
+    private readonly hpBar: Graphics;
+
     constructor(
-        readonly sprites: Map<Direction, AnimatedSprite>,
+        private readonly sprites: Map<Direction, AnimatedSprite>,
         readonly pokemon: Pokemon
     ) {
+        super();
+        for (const sprite of this.sprites.values()) {
+            this.addChild(sprite);
+        }
+        this.hpBar = new Graphics();
+        this.addChild(this.hpBar);
     }
 
     update = () => {
-        this.pokemon.act();
-
+        this.x = this.pokemon.position.x;
+        this.y = this.pokemon.position.y;
         for (const sprite of this.sprites.values()) {
-            sprite.x = this.pokemon.position.x;
-            sprite.y = this.pokemon.position.y;
             sprite.visible = false;
             sprite.stop();
         }
@@ -23,12 +30,22 @@ export class PokemonSprite {
             activeSprite.visible = true;
             activeSprite.play();
         }
+        this.updateHpBar();
+    }
+
+    private updateHpBar = () => {
+        const spriteHeight = this.sprites.get(Direction.UP).texture.trim?.height || this.sprites.get(Direction.UP).height;
+        this.hpBar.clear()
+        const hpWidth = 32 * (this.pokemon.data.battleData.curHP() / this.pokemon.data.battleData.maxHP());
+        this.hpBar.rect(-16, spriteHeight + 15, hpWidth, 4);
+        this.hpBar.fill("#40ff00");
+        this.hpBar.rect(-16 + hpWidth, spriteHeight + 15, 32 - hpWidth, 4);
+        this.hpBar.fill("#ff0000");
     }
 }
 
 export const createPokemonSprite = (pokemon: Pokemon): PokemonSprite => {
-
-    const anim: [Direction, AnimatedSprite][] = Array.from(getPokemonTextures(pokemon.data.id.toString().padStart(3, '0')).entries())
+    const anim: [Direction, AnimatedSprite][] = getPokemonTextures(pokemon)
         .map(([direction, textures]) => {
             let anim;
             try {
@@ -41,8 +58,6 @@ export const createPokemonSprite = (pokemon: Pokemon): PokemonSprite => {
                 anim.height = 32;
             }
 
-            anim.x = pokemon.position.x;
-            anim.y = pokemon.position.y;
             anim.anchor.set(0.5);
             return [direction, anim];
         });
@@ -50,14 +65,12 @@ export const createPokemonSprite = (pokemon: Pokemon): PokemonSprite => {
     return new PokemonSprite(new Map(anim), pokemon);
 }
 
-export const getPokemonTextures = (id: String) =>
-    new Map(
-        [
-            [Direction.UP, asTexture([`o-b_hs_${id}_1.png`, `o-b_hs_${id}_2.png`])],
-            [Direction.DOWN, asTexture([`o_hs_${id}_1.png`, `o_hs_${id}_2.png`])],
-            [Direction.LEFT, asTexture([`o-l_hs_${id}_1.png`, `o-l_hs_${id}_2.png`])],
-            [Direction.RIGHT, asTexture([`o-r_hs_${id}_1.png`, `o-r_hs_${id}_2.png`])]
-        ]
-    )
-
-const asTexture = (urls: string[]) => urls.map((url) => Texture.from(url));
+const getPokemonTextures = (pokemon: Pokemon): [Direction, Texture[]][] => {
+    const id = pokemon.data.id.toString().padStart(3, '0')
+    return [
+        [Direction.UP, loadTextures([`o-b_hs_${id}_1.png`, `o-b_hs_${id}_2.png`])],
+        [Direction.DOWN, loadTextures([`o_hs_${id}_1.png`, `o_hs_${id}_2.png`])],
+        [Direction.LEFT, loadTextures([`o-l_hs_${id}_1.png`, `o-l_hs_${id}_2.png`])],
+        [Direction.RIGHT, loadTextures([`o-r_hs_${id}_1.png`, `o-r_hs_${id}_2.png`])]
+    ];
+}

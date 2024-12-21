@@ -4,6 +4,7 @@ import {loadAssets} from "./assets";
 import {World} from "../../domain/model/world";
 import {config} from "../../worldConfig"
 import {loadNationalPokedex} from "../../domain/model/pokedex";
+import {createTicker} from "./common/ticker";
 
 export const start = async (
     width: number,
@@ -28,5 +29,6 @@ export const start = async (
     const worldContainer = new WorldContainer(app, width, height, world);
 
     worldContainer.render();
+    app.ticker.add(createTicker(1000 / 30, worldContainer.runEachFrame));
     // await renderWater(app);
 };
