@@ -1,36 +1,42 @@
 import {WorldConfig} from "./domain/model/biomes";
 
 export const config: WorldConfig = {
-    "assets": [
+    pokemons: {
+        maxNumber: 10,
+        maxDistanceToCenter: 1000
+    },
+    chunkSize: 20,
+    tileSize: 50,
+    assets: [
         {
-            "alias": "TREE_1",
-            "src": "dist/images/tree1.png"
+            alias: "TREE_1",
+            src: "dist/images/tree1.png"
         },
         {
-            "alias": "TREE_2",
-            "src": "dist/images/tree2.png"
+            alias: "TREE_2",
+            src: "dist/images/tree2.png"
         },
         {
-            "alias": "ROCK_1",
-            "src": "dist/images/rock1.png"
+            alias: "ROCK_1",
+            src: "dist/images/rock1.png"
         },
         {
-            "alias": "ROCK_2",
-            "src": "dist/images/rock2.png"
+            alias: "ROCK_2",
+            src: "dist/images/rock2.png"
         },
         {
-            "alias": "UNKNOWN",
-            "src": "dist/images/pokemon/unknown.png"
+            alias: "UNKNOWN",
+            src: "dist/images/pokemon/unknown.png"
         },
         {
-            "alias": "POKEMONS",
-            "src": "dist/images/pokemon/texture.json"
+            alias: "POKEMONS",
+            src: "dist/images/pokemon/texture.json"
         }
     ],
-    "biomes": {
+    biomes: {
         "sub": [
             {
-                "threshold": 0.05,
+                "threshold": 0.1,
                 "sub": [
                     {
                         "type": "DESERT",

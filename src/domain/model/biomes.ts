@@ -5,8 +5,16 @@ export type ItemConfig = {
 }
 
 export type WorldConfig = {
+    pokemons: PokemonGenerationConfig
+    chunkSize: number
+    tileSize: number
     assets: { alias: string, src: string }[]
     biomes: BiomeConfig
+}
+
+export type PokemonGenerationConfig = {
+    maxNumber: number
+    maxDistanceToCenter: number
 }
 
 export type BiomeConfig = {

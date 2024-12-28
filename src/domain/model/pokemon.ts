@@ -1,13 +1,9 @@
 import {Result} from "@smogon/calc";
-import {IdleState} from "./states";
-import {Position} from "./types";
+import {IdleState, PokemonState} from "./states";
+import {Direction, Position} from "./types";
 import {PokemonData} from "./pokedex";
+import {World} from "./world";
 
-export interface PokemonState {
-    next(): PokemonState
-
-    act(): void
-}
 
 const DIRECTION_VECTOR = [
     {x: Math.cos(Math.PI), y: Math.sin(Math.PI)},
@@ -17,19 +13,24 @@ const DIRECTION_VECTOR = [
 ]
 
 export class Pokemon {
-    private state: PokemonState = new IdleState(this);
+    private state: PokemonState = new IdleState();
 
     constructor(
+        public data: PokemonData,
         public position: Position,
-        public direction = 0,
-        public speed = 1,
-        readonly data: PokemonData
+        public direction: Direction,
+        public speed = 3
     ) {
     }
 
-    act() {
-        this.state.act();
-        this.state = this.state.next();
+    distanceTo(pokemon: Pokemon) {
+        const dx = this.position.x - pokemon.position.x;
+        const dy = this.position.y - pokemon.position.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    act(world: World) {
+        this.state = this.state.actIfNotKO(this, world);
     }
 
     face(direction: number) {
@@ -41,7 +42,42 @@ export class Pokemon {
         this.position.y += DIRECTION_VECTOR[this.direction].y * this.speed;
     }
 
-    update(_result: Result) {
+    attacked(result: Result) {
+        let damage: number;
+        const recoil = result.recoil().recoil;
+        if (typeof recoil !== "number") {
+            damage = recoil[0];
+        } else {
+            damage = recoil;
+        }
+        this.data.battleData.originalCurHP = Math.max(0, this.data.battleData.curHP() - damage);
+    }
 
+    defended(result: Result) {
+        let damage: number;
+        if (typeof result.damage !== "number") {
+            if (typeof result.damage[0] !== "number") {
+                damage = result.damage[0][0];
+            } else {
+                damage = result.damage[0];
+            }
+        } else {
+            damage = result.damage;
+        }
+        this.data.battleData.originalCurHP = Math.max(0, this.data.battleData.curHP() - damage);
+    }
+
+    facePokemon(target: Pokemon) {
+        const dx = target.position.x - this.position.x;
+        const dy = target.position.y - this.position.y;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            this.direction = dx > 0 ? Direction.RIGHT : Direction.LEFT
+        } else {
+            this.direction = dy > 0 ? Direction.DOWN : Direction.UP
+        }
+    }
+
+    isKO() {
+        return this.data.battleData.curHP() <= 0;
     }
 }

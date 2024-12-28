@@ -42,6 +42,7 @@
     "marchingsquares": "^1.3.3",
     "pixi-viewport": "^5.0.3",
     "pixi.js": "^8.4.1",
+    "pokemon-showdown": "^0.11.9",
     "two.js": "^0.8.12"
   }
 }

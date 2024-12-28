@@ -24,11 +24,12 @@ export const start = async (
 
     // render the world
     const pokedex = await loadNationalPokedex();
-    const world = new World(20, 50, 3, config, pokedex);
+    const world = new World(3, config, pokedex);
 
     const worldContainer = new WorldContainer(app, width, height, world);
 
     worldContainer.render();
     app.ticker.add(createTicker(1000 / 30, worldContainer.runEachFrame));
+    app.ticker.add(createTicker(1000 / 2, worldContainer.updateTree));
     // await renderWater(app);
 };

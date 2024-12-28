@@ -1,6 +1,6 @@
 import {BiomeConfig, WorldConfig} from "./biomes";
 import {Item} from "./item";
-import {PerlinNoise, PerlinNoiseGenerator} from "../utils/perlin";
+import {PerlinNoise, FBMGenerator} from "../utils/perlin";
 import {randomInt} from "../utils/random";
 import {Normal} from "distributions";
 
@@ -26,18 +26,17 @@ export class Chunk {
 }
 
 export class ChunkGenerator {
-    private readonly generators: PerlinNoiseGenerator[];
+    private readonly generators: FBMGenerator[];
     private readonly randomizer = randomInt(1, 100);
     private readonly normalDistribution = Normal(0, 0.22);
 
     constructor(
-        private readonly chunkSize: number,
         chunkNodes: number,
         private readonly config: WorldConfig
     ) {
         const depth = this.getBiomesDepth();
 
-        this.generators = Array.from({length: depth}).map(() => new PerlinNoiseGenerator(chunkNodes, 2));
+        this.generators = Array.from({length: depth}).map(() => new FBMGenerator(chunkNodes, 2));
     }
 
     private getBiomesDepth() {
@@ -72,7 +71,7 @@ export class ChunkGenerator {
     }
 
     private generateItems(tiles: BiomeConfig[][], n: number, m: number) {
-        const {chunkSize, randomizer} = this;
+        const {config: {chunkSize}, randomizer} = this;
         return tiles
             .flatMap((line, x) => line
                 .map((biome, y) => ({
@@ -83,7 +82,7 @@ export class ChunkGenerator {
     }
 
     generate(n: number, m: number): Chunk {
-        const {generators, chunkSize} = this;
+        const {generators, config: {chunkSize}} = this;
         const noises = generators
             .map(generator => generator.generateNoiseField(n, m, chunkSize));
 

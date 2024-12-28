@@ -1,84 +1,108 @@
-import {calculate, Move, Pokemon as SmogonPokemon} from "@smogon/calc";
-import {Pokemon, PokemonState} from "./pokemon";
+import {calculate, Move} from "@smogon/calc";
+import {Pokemon} from "./pokemon";
 import {randomInt} from "../utils/random";
+import {World} from "./world";
 
 const randomPercentage = randomInt(0, 100)
 const randomDirection = randomInt(0, 3)
 
-export class IdleState implements PokemonState {
-    private readonly pokemon: Pokemon;
+export abstract class PokemonState {
+    protected abstract act(pokemon: Pokemon, world: World): PokemonState
 
-    constructor(pokemon: Pokemon) {
-        this.pokemon = pokemon;
-    }
-
-    next(): PokemonState {
-        const rand = randomPercentage()
-        if (rand < 10) {
-            return new MovingState(this.pokemon);
+    actIfNotKO(pokemon: Pokemon, world: World): PokemonState {
+        if (pokemon.isKO()) {
+            return this
         }
-        return this;
-    }
-
-    act(): void {
+        return this.act(pokemon, world)
     }
 }
 
-export class MovingState implements PokemonState {
-
-    private readonly pokemon: Pokemon;
-    private readonly direction: number;
-
-    constructor(pokemon: Pokemon) {
-        this.pokemon = pokemon;
-        this.direction = randomDirection();
+export abstract class HandlingTarget extends PokemonState {
+    protected constructor(protected target?: Pokemon) {
+        super();
     }
 
-    next(): PokemonState {
+    abstract act(pokemon: Pokemon, world: World): PokemonState
+
+    findTarget(pokemon: Pokemon, world: World) {
+        if (this.target && !this.target.isKO()) return
+
+        const targets = world.seeAround(pokemon, 500)
+        if (targets.length > 0) {
+            this.target = targets[0].candidate
+        }
+    }
+}
+
+export class IdleState extends HandlingTarget {
+    constructor(target?: Pokemon) {
+        super(target);
+    }
+
+    act(pokemon: Pokemon, world: World): PokemonState {
+        this.findTarget(pokemon, world)
+        if (this.target) return new AttackingState(this.target);
+
+        const rand = randomPercentage()
+        if (rand < 10) return new MovingState();
+
+        return this;
+    }
+}
+
+export class MovingState extends HandlingTarget {
+    constructor(target?: Pokemon) {
+        super(target);
+    }
+
+    private readonly direction: number = randomDirection();
+
+    act(pokemon: Pokemon, world: World): PokemonState {
+        this.findTarget(pokemon, world)
+        if (this.target) return new AttackingState(this.target);
+
+        pokemon.face(this.direction)
+        pokemon.move()
         const rand = randomPercentage()
         if (rand < 2) {
-            return new IdleState(this.pokemon);
+            return new IdleState();
         }
         return this;
     }
-
-    act(): void {
-        this.pokemon.face(this.direction)
-        this.pokemon.move()
-    }
 }
 
-export class AttackingState implements PokemonState {
-    private readonly pokemon: Pokemon;
-    private readonly target: Pokemon;
+export class AttackingState extends PokemonState {
+    private lastAttack = 31;
 
-    constructor(pokemon: Pokemon, target: Pokemon) {
-        this.pokemon = pokemon;
-        this.target = target;
+    constructor(
+        private readonly target: Pokemon
+    ) {
+        super();
     }
 
-    next(): PokemonState {
-        return new IdleState(this.pokemon);
+    act(pokemon: Pokemon): PokemonState {
+        if (pokemon.distanceTo(this.target) > 50) {
+            pokemon.facePokemon(this.target)
+            pokemon.move()
+            return this
+        } else if (this.lastAttack > 30) {
+            this.lastAttack = 0
+            this.attack(pokemon)
+            return this
+        }
+        this.lastAttack++
+        return new IdleState();
     }
 
-    act(): void {
-        const gen = 9;
+    attack(pokemon: Pokemon) {
+        const gen = pokemon.data.battleData.gen
         const result = calculate(
             gen,
-            new SmogonPokemon(gen, 'Gengar', {
-                item: 'Choice Specs',
-                nature: 'Timid',
-                evs: {spa: 252},
-                boosts: {spa: 1},
-            }),
-            new SmogonPokemon(gen, 'Chansey', {
-                item: 'Eviolite',
-                nature: 'Calm',
-                evs: {hp: 252, spd: 252},
-            }),
-            new Move(gen, 'Focus Blast')
+            pokemon.data.battleData,
+            this.target.data.battleData,
+            new Move(gen, 'Aurora Beam')
         );
-        this.pokemon.update(result)
-        this.target.update(result)
+        pokemon.attacked(result)
+        this.target.defended(result)
     }
 }

@@ -37,9 +37,9 @@ export class PokemonSprite extends Container {
         const spriteHeight = this.sprites.get(Direction.UP).texture.trim?.height || this.sprites.get(Direction.UP).height;
         this.hpBar.clear()
         const hpWidth = 32 * (this.pokemon.data.battleData.curHP() / this.pokemon.data.battleData.maxHP());
-        this.hpBar.rect(-16, spriteHeight + 15, hpWidth, 4);
+        this.hpBar.rect(-16, spriteHeight + 17, hpWidth, 4);
         this.hpBar.fill("#40ff00");
-        this.hpBar.rect(-16 + hpWidth, spriteHeight + 15, 32 - hpWidth, 4);
+        this.hpBar.rect(-16 + hpWidth, spriteHeight + 17, 32 - hpWidth, 4);
         this.hpBar.fill("#ff0000");
     }
 }

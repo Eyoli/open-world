@@ -111,7 +111,7 @@ function* noisesGenerator(gradientField: GradientField, fieldSize: number, octav
     }
 }
 
-export class PerlinNoiseGenerator {
+export class FBMGenerator {
     private readonly gradientFields: Map<string, GradientField> = new Map();
 
     constructor(

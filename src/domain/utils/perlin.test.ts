@@ -1,6 +1,6 @@
 // Generate suite test for perlin noise
 
-import {PerlinNoiseGenerator} from "./perlin";
+import {FBMGenerator} from "./perlin";
 
 jest.mock('d3-random', () => {
     let i = 0;
@@ -15,7 +15,7 @@ jest.mock('d3-random', () => {
 describe("PerlinNoiseGenerator", () => {
 
     it("should extend gradient field correctly (line translation)", () => {
-        const perlin = new PerlinNoiseGenerator(2);
+        const perlin = new FBMGenerator(2);
         const result = perlin.generateNoiseField(0, 0, 2);
         const nextResult = perlin.generateNoiseField(1, 0, 2);
 
@@ -23,7 +23,7 @@ describe("PerlinNoiseGenerator", () => {
     });
 
     it("should extend gradient field correctly (row translation)", () => {
-        const perlin = new PerlinNoiseGenerator(2);
+        const perlin = new FBMGenerator(2);
         const result = perlin.generateNoiseField(0, 0, 2);
         const nextResult = perlin.generateNoiseField(0, 1, 2);
 

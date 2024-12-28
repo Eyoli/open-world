@@ -1,30 +1,51 @@
-import {Position} from "./types";
+import {Direction, Position} from "./types";
 import {WorldConfig} from "./biomes";
 import {Chunk, ChunkGenerator} from "./chunk";
 import {Pokedex} from "./pokedex";
 import {Pokemon} from "./pokemon";
 import {randomInt} from "../utils/random";
+import {quadtree, Quadtree, QuadtreeLeaf} from "d3-quadtree";
 
 export class World {
     private readonly chunkGenerator: ChunkGenerator
     private readonly chunks: Map<string, Chunk> = new Map();
     private readonly pokemons: Pokemon[] = [];
+    pokemonTree: Quadtree<{ x: number, y: number, data: Pokemon }> = quadtree()
     center: Position = {x: 0, y: 0};
 
     constructor(
-        private readonly chunkSize: number,
-        readonly tileSize: number,
         private readonly loadingDistance: number,
-        config: WorldConfig,
+        readonly config: WorldConfig,
         private readonly pokedex: Pokedex
     ) {
-        this.chunkGenerator = new ChunkGenerator(chunkSize, 1, config);
+        this.chunkGenerator = new ChunkGenerator(1, config);
+    }
+
+    seeAround(pokemon: Pokemon, radius: number) {
+        const results: { candidate: Pokemon, distance: number }[] = [];
+        this.pokemonTree.visit((node, x0, y0, x1, y1) => {
+            if (!node.length) {
+                let leaf = node as unknown as QuadtreeLeaf<{ x: number, y: number, data: Pokemon }>
+                do {
+                    let candidate = leaf.data.data;
+                    const distance = pokemon.distanceTo(candidate);
+                    if (pokemon != candidate && distance < radius) {
+                        results.push({candidate, distance});
+                    }
+                    leaf = leaf.next
+                } while (leaf);
+            }
+            return x0 <= pokemon.position.x && pokemon.position.x < x1 && y0 <= pokemon.position.y && pokemon.position.y < y1;
+        })
+        return results.sort((a, b) => a.distance - b.distance);
     }
 
     addPokemon() {
+        const {config: {pokemons: {maxNumber, maxDistanceToCenter}}} = this;
+
         const added: Pokemon[] = [];
-        if (this.pokemons.length < 100) {
-            const randomPosition = randomInt(-2000, 2000);
+        if (this.pokemons.length < maxNumber) {
+            const randomPosition = randomInt(-maxDistanceToCenter, maxDistanceToCenter);
             const position = {x: this.center.x + randomPosition(), y: this.center.y + randomPosition()};
             const pokemon = this.generatePokemonAt(position)
             added.push(pokemon);
@@ -35,8 +56,18 @@ export class World {
 
     update() {
         for (const pokemon of this.pokemons) {
-            pokemon.act();
+            pokemon.act(this);
         }
+    }
+
+    updateTree = () => {
+        this.pokemonTree = quadtree(this.pokemons.map(p => {
+            return {
+                x: p.position.x,
+                y: p.position.y,
+                data: p
+            }
+        }), d => d.x, d => d.y);
     }
 
     removePokemons = () => {
@@ -44,7 +75,7 @@ export class World {
             const dx = pokemon.position.x - this.center.x;
             const dy = pokemon.position.y - this.center.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            return (distance > 2000)
+            return pokemon.isKO() || (distance > this.config.pokemons.maxDistanceToCenter)
         })
 
         pokemonsToRemove.forEach((pokemon) => {
@@ -56,8 +87,8 @@ export class World {
 
     private getChunkPosition(position: Position) {
         return {
-            n: Math.floor(position.x / (this.chunkSize * this.tileSize)),
-            m: Math.floor(position.y / (this.chunkSize * this.tileSize))
+            n: Math.floor(position.x / (this.config.chunkSize * this.config.tileSize)),
+            m: Math.floor(position.y / (this.config.chunkSize * this.config.tileSize))
         }
     }
 
@@ -81,14 +112,16 @@ export class World {
         }
     }
 
-    generatePokemonAt(position: Position) {
+    private generatePokemonAt(position: Position) {
+        const {pokedex, config: {tileSize, chunkSize}} = this
+
         const {n, m} = this.getChunkPosition(position);
         const chunk = this.getChunkAt(n, m);
-        const factor = this.chunkSize * this.tileSize
-        const chunkX = Math.floor((position.x - n * factor) / this.tileSize)
-        const chunkY = Math.floor((position.y - m * factor) / this.tileSize)
+        const factor = chunkSize * tileSize
+        const chunkX = Math.floor((position.x - n * factor) / tileSize)
+        const chunkY = Math.floor((position.y - m * factor) / tileSize)
         const biome = chunk.getTileAt(chunkX, chunkY);
-        const pokemonData = this.pokedex.generateRandomPokemon(biome);
-        return new Pokemon(position, 0, 1, pokemonData)
+        const pokemonData = pokedex.generateRandomPokemon(biome);
+        return new Pokemon(pokemonData, position, Direction.UP)
     }
 }

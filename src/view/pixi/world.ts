@@ -12,11 +12,12 @@ export class WorldContainer {
     private readonly backgroundLayer: Container<ContainerChild>;
     private readonly itemLayer: Container<ContainerChild>;
     private readonly pokemonLayer: Container<PokemonSprite>;
+    private readonly collisionLayer: Graphics = new Graphics();
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
 
     constructor(
-        private readonly app: Application,
+        app: Application,
         width: number,
         height: number,
         private readonly world: World
@@ -34,9 +35,12 @@ export class WorldContainer {
         this.pokemonLayer = new Container();
         this.container.addChild(this.pokemonLayer);
 
+        //this.container.addChild(this.collisionLayer);
+
         this.viewport = createAdminViewport(app, width, height);
         app.stage.addChild(this.viewport);
         this.viewport.addChild(this.container);
+        this.viewport.moveCenter(this.world.center.x, this.world.center.y);
     }
 
     render = () => {
@@ -84,15 +88,26 @@ export class WorldContainer {
         }
     }
 
+    updateTree = () => {
+        this.world.updateTree();
+        this.collisionLayer.clear();
+        this.world.pokemonTree.visit((node, x1, y1, x2, y2) => {
+            if (x2 > x1 && y2 > y1) {
+                this.collisionLayer.rect(x1, y1, x2 - x1, y2 - y1);
+                this.collisionLayer.stroke({color: 0xff0000, width: 5});
+            }
+        })
+    }
+
     private renderChunkBackground(chunk: Chunk) {
-        const {world} = this;
+        const {world: {config: {tileSize}}} = this;
 
         const graphics = new Graphics();
 
-        const offsetX = chunk.n * chunk.size * world.tileSize;
-        const offsetY = chunk.m * chunk.size * world.tileSize;
+        const offsetX = chunk.n * chunk.size * tileSize;
+        const offsetY = chunk.m * chunk.size * tileSize;
         for (const {x, y, biome} of chunk.enumerateTiles()) {
-            graphics.rect(offsetX + x * world.tileSize, offsetY + y * world.tileSize, world.tileSize, world.tileSize);
+            graphics.rect(offsetX + x * tileSize, offsetY + y * tileSize, tileSize, tileSize);
             graphics.fill(biome.color);
         }
 
@@ -124,7 +139,7 @@ export class WorldContainer {
 
 const createItemView = (item: Item, world: World) => new Sprite({
     texture: Texture.from(item.type),
-    x: item.position[0] * world.tileSize,
-    y: item.position[1] * world.tileSize,
+    x: item.position[0] * world.config.tileSize,
+    y: item.position[1] * world.config.tileSize,
     scale: item.scale,
 });
