@@ -67,11 +67,11 @@ const noise2d = (gradients: GradientField, x: number, y: number) => {
     return value;
 }
 
-const randomGradientField = (size: number): GradientField => {
+const randomGradientField = (nx: number, ny: number): GradientField => {
     const field = [];
-    for (let i = 0; i < size; i++) {
+    for (let i = 0; i < nx; i++) {
         field.push([]);
-        for (let j = 0; j < size; j++) {
+        for (let j = 0; j < ny; j++) {
             const random = randomRadAngle();
             field[i].push([Math.cos(random), Math.sin(random)])
         }
@@ -115,49 +115,44 @@ export class FBMGenerator {
     private readonly gradientFields: Map<string, GradientField> = new Map();
 
     constructor(
-        readonly size: number,
+        readonly gradNumber: number,
         private readonly fractalBrownianOctaves: number = 1
     ) {
     }
 
 
     private generateField = (n: number, m: number) => {
-        const {gradientFields, size} = this;
+        const {gradientFields, gradNumber} = this;
         if (!gradientFields.has(`${n}-${m}`)) {
-            console.log(`Generating field ${n}-${m}`);
-            gradientFields.set(`${n}-${m}`, randomGradientField(size));
+            gradientFields.set(`${n}-${m}`, randomGradientField(gradNumber, gradNumber));
         }
+        return gradientFields.get(`${n}-${m}`);
     }
 
     private getWorkingGradientField = (n: number, m: number): GradientField => {
-        const {gradientFields, size} = this;
+        const {generateField, gradNumber} = this;
 
-        const fieldNM = gradientFields.get(`${n}-${m}`);
-        const fieldN1M = gradientFields.get(`${n + 1}-${m}`);
-        const fieldNM1 = gradientFields.get(`${n}-${m + 1}`);
-        const fieldN1M1 = gradientFields.get(`${n + 1}-${m + 1}`);
+        const fieldNM = generateField(n, m);
+        const fieldN1M = generateField(n + 1, m);
+        const fieldNM1 = generateField(n, m + 1);
+        const fieldN1M1 = generateField(n + 1, m + 1);
 
         const workingField = []
-        for (let i = 0; i < size; i++) {
+        for (let i = 0; i < gradNumber; i++) {
             workingField.push([]);
-            for (let j = 0; j < size; j++) {
+            for (let j = 0; j < gradNumber; j++) {
                 workingField[i].push(fieldNM[i][j]);
             }
             workingField[i].push(fieldNM1[i][0]);
         }
         workingField.push(fieldN1M[0]);
-        workingField[size].push(fieldN1M1[0][0]);
+        workingField[gradNumber].push(fieldN1M1[0][0]);
 
         return workingField;
     }
 
     generateNoiseField(n: number, m: number, fieldSize: number): PerlinNoise {
-        const {generateField, getWorkingGradientField, fractalBrownianOctaves} = this;
-
-        generateField(n, m);
-        generateField(n + 1, m);
-        generateField(n, m + 1);
-        generateField(n + 1, m + 1);
+        const {getWorkingGradientField, fractalBrownianOctaves} = this;
 
         const gradientField = getWorkingGradientField(n, m);
 

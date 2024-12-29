@@ -1,14 +1,13 @@
 import {Direction, Position} from "./types";
 import {WorldConfig} from "./biomes";
-import {Chunk, ChunkGenerator} from "./chunk";
+import {ChunksHolder} from "./chunk";
 import {Pokedex} from "./pokedex";
 import {Pokemon} from "./pokemon";
 import {randomInt} from "../utils/random";
 import {quadtree, Quadtree, QuadtreeLeaf} from "d3-quadtree";
 
 export class World {
-    private readonly chunkGenerator: ChunkGenerator
-    private readonly chunks: Map<string, Chunk> = new Map();
+    private readonly chunksHolder: ChunksHolder;
     private readonly pokemons: Pokemon[] = [];
     pokemonTree: Quadtree<{ x: number, y: number, data: Pokemon }> = quadtree()
     center: Position = {x: 0, y: 0};
@@ -18,7 +17,7 @@ export class World {
         readonly config: WorldConfig,
         private readonly pokedex: Pokedex
     ) {
-        this.chunkGenerator = new ChunkGenerator(1, config);
+        this.chunksHolder = new ChunksHolder(config);
     }
 
     seeAround(pokemon: Pokemon, radius: number) {
@@ -85,42 +84,16 @@ export class World {
         return pokemonsToRemove;
     }
 
-    private getChunkPosition(position: Position) {
-        return {
-            n: Math.floor(position.x / (this.config.chunkSize * this.config.tileSize)),
-            m: Math.floor(position.y / (this.config.chunkSize * this.config.tileSize))
-        }
-    }
-
-    private getChunkAt(n: number, m: number) {
-        const {chunks, chunkGenerator} = this;
-        const key = `${n}-${m}`;
-        if (!chunks.has(key)) {
-            chunks.set(key, chunkGenerator.generate(n, m));
-        }
-        return chunks.get(key);
-    }
-
-    * getVisibleChunks() {
-        const {center, loadingDistance} = this;
-        const {n, m} = this.getChunkPosition(center);
-
-        for (let i = -loadingDistance; i <= loadingDistance; i++) {
-            for (let j = -loadingDistance; j <= loadingDistance; j++) {
-                yield this.getChunkAt(n + i, m + j);
-            }
-        }
+    getVisibleChunks() {
+        return this.chunksHolder.getVisibleChunks(this.center, this.loadingDistance);
     }
 
     private generatePokemonAt(position: Position) {
-        const {pokedex, config: {tileSize, chunkSize}} = this
+        const {chunksHolder, pokedex} = this
 
-        const {n, m} = this.getChunkPosition(position);
-        const chunk = this.getChunkAt(n, m);
-        const factor = chunkSize * tileSize
-        const chunkX = Math.floor((position.x - n * factor) / tileSize)
-        const chunkY = Math.floor((position.y - m * factor) / tileSize)
-        const biome = chunk.getTileAt(chunkX, chunkY);
+        const chunk = chunksHolder.getChunk(position);
+
+        const biome = chunk.getTile(position);
         const pokemonData = pokedex.generateRandomPokemon(biome);
         return new Pokemon(pokemonData, position, Direction.UP)
     }

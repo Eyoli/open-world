@@ -9,7 +9,8 @@ export type WorldConfig = {
     chunkSize: number
     tileSize: number
     assets: { alias: string, src: string }[]
-    biomes: BiomeConfig
+    biomes: { [key: string]: BiomeConfig }
+    terrain: TerrainConfig
 }
 
 export type PokemonGenerationConfig = {
@@ -18,12 +19,16 @@ export type PokemonGenerationConfig = {
 }
 
 export type BiomeConfig = {
+    type: string
+    color: string
+    items: ItemConfig[]
+    pokemons: PokemonConfig[]
+}
+
+export type TerrainConfig = {
     type?: string
-    color?: string
     threshold?: number
-    items?: ItemConfig[]
-    pokemons?: PokemonConfig[]
-    sub?: BiomeConfig[]
+    sub?: TerrainConfig[]
 }
 
 export type PokemonConfig = {
