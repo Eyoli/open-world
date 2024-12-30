@@ -31,6 +31,10 @@ export const config: WorldConfig = {
         {
             alias: "POKEMONS",
             src: "dist/images/pokemon/texture.json"
+        },
+        {
+            alias: "TREES",
+            src: "dist/images/trees/trees.json"
         }
     ],
     biomes: {
@@ -94,14 +98,14 @@ export const config: WorldConfig = {
             ],
             items: [
                 {
-                    "type": "TREE_1",
+                    "type": "tile006",
                     "p": 1,
-                    "scale": 0.3
+                    "scale": 2
                 },
                 {
-                    "type": "TREE_2",
+                    "type": "tile010",
                     "p": 2,
-                    "scale": 0.3
+                    "scale": 2
                 }
             ]
         },
@@ -144,14 +148,19 @@ export const config: WorldConfig = {
             ],
             items: [
                 {
-                    type: "TREE_1",
-                    p: 15,
-                    scale: 0.3
+                    type: "tile007",
+                    p: 10,
+                    scale: 2
                 },
                 {
-                    type: "TREE_2",
-                    p: 25,
-                    scale: 0.3
+                    type: "tile008",
+                    p: 20,
+                    scale: 2
+                },
+                {
+                    type: "tile006",
+                    p: 10,
+                    scale: 2
                 }
             ]
         },
@@ -240,7 +249,7 @@ export const config: WorldConfig = {
     terrain: {
         "sub": [
             {
-                "threshold": 0.1,
+                "threshold": 0.05,
                 "sub": [
                     {
                         "type": "DESERT",

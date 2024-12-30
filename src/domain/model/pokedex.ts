@@ -24,18 +24,24 @@ export class Pokedex {
         return this.data.get(id.toString())
     }
 
-    generateRandomPokemon(biome: BiomeConfig): PokemonData {
+    generateRandomPokemon(biome: BiomeConfig): PokemonData | undefined {
         const randomizer = randomInt(1, 100)
         const config = biome.pokemons?.find(pConf => randomizer() < pConf.p)
 
+        let pokemonData: PokemonData | undefined;
         const id = config?.id || randomPokemonId()
         const pokedexEntry = this.getEntry(id)
-        const pokemonData = new SmogonPokemon(POKEMON_GEN, pokedexEntry["Pokemon"]);
-        return {
-            id,
-            generalData: pokedexEntry,
-            battleData: pokemonData
+        try {
+            pokemonData = {
+                id,
+                generalData: pokedexEntry,
+                battleData: new SmogonPokemon(POKEMON_GEN, pokedexEntry["Pokemon"])
+            }
+        } catch (e) {
+            console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${id})`, e)
         }
+
+        return pokemonData
     }
 }
 

@@ -4,6 +4,7 @@ import {FBMGenerator, PerlinNoise} from "../utils/perlin";
 import {randomInt} from "../utils/random";
 import {Normal} from "distributions";
 import {Position} from "./types";
+import {Map2D} from "../utils/collections";
 
 export class Chunk {
     constructor(
@@ -26,26 +27,24 @@ export class Chunk {
 
     getTile = (position: Position) => {
         const {n, m, size, tileSize, tiles} = this;
-        const factor = size * tileSize;
-        const x = Math.floor((position.x - n * factor) / tileSize)
-        const y = Math.floor((position.y - m * factor) / tileSize)
+        const x = Math.floor(position.x / tileSize - n * size)
+        const y = Math.floor(position.y / tileSize - m * size)
         return tiles[x][y];
     };
 }
 
 export class ChunksHolder {
-    private readonly chunks: Map<string, Chunk> = new Map();
+    private readonly chunks = new Map2D<Chunk>();
     private readonly generators: FBMGenerator[];
     private readonly randomizer = randomInt(1, 100);
     private readonly normalDistribution = Normal(0, 0.22);
 
     constructor(
-        private readonly config: WorldConfig,
-        chunkNodes: number = 1
+        private readonly config: WorldConfig
     ) {
         const depth = this.getBiomesDepth();
 
-        this.generators = Array.from({length: depth}).map(() => new FBMGenerator(chunkNodes, 2));
+        this.generators = Array.from({length: depth}).map(() => new FBMGenerator(50, 2));
     }
 
     private getBiomesDepth() {
@@ -114,17 +113,13 @@ export class ChunksHolder {
 
     private getChunkAt(n: number, m: number) {
         const {chunks} = this;
-        const key = `${n}-${m}`;
-        if (!chunks.has(key)) {
-            chunks.set(key, this.generate(n, m));
-        }
-        return chunks.get(key);
+        return chunks.getOrSetDefault(n, m, () => this.generate(n, m));
     }
 
     private generate(n: number, m: number) {
         const {generators, config: {chunkSize, tileSize}} = this;
         const noises = generators
-            .map(generator => generator.generateNoiseField(n, m, chunkSize));
+            .map(generator => generator.getNoiseField(n * chunkSize, m * chunkSize, chunkSize, chunkSize));
 
         const tiles = this.extractTiles(noises);
         const items = this.generateItems(tiles, n, m);
