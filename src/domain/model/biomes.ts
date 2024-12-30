@@ -39,5 +39,5 @@ export type TerrainConfig = {
 
 export type PokemonConfig = {
     id: number
-    p: number
+    w: number
 }

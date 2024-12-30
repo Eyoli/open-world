@@ -2,7 +2,7 @@ import {WorldConfig} from "./domain/model/biomes";
 
 export const config: WorldConfig = {
     pokemons: {
-        maxNumber: 20,
+        maxNumber: 50,
         maxDistanceToCenter: 2000
     },
     chunkSize: 20,
@@ -50,15 +50,15 @@ export const config: WorldConfig = {
             pokemons: [
                 {
                     id: 7,
-                    p: 20
+                    w: 4
                 },
                 {
                     id: 8,
-                    p: 30
+                    w: 2
                 },
                 {
                     id: 9,
-                    p: 40
+                    w: 1
                 }
             ],
             items: []
@@ -69,15 +69,15 @@ export const config: WorldConfig = {
             pokemons: [
                 {
                     id: 7,
-                    p: 20
+                    w: 4
                 },
                 {
                     id: 8,
-                    p: 30
+                    w: 2
                 },
                 {
                     id: 9,
-                    p: 40
+                    w: 1
                 }
             ],
             items: []
@@ -88,32 +88,56 @@ export const config: WorldConfig = {
             pokemons: [
                 {
                     id: 16,
-                    p: 20
+                    w: 4
                 },
                 {
                     id: 17,
-                    p: 30
+                    w: 2
                 },
                 {
                     id: 18,
-                    p: 40
+                    w: 1
                 },
                 {
                     id: 19,
-                    p: 60
+                    w: 4
                 },
                 {
                     id: 20,
-                    p: 70
+                    w: 2
                 },
                 {
                     id: 21,
-                    p: 90
+                    w: 4
                 },
                 {
                     id: 22,
-                    p: 100
-                }
+                    w: 4
+                },
+                {
+                    id: 29,
+                    w: 4
+                },
+                {
+                    id: 30,
+                    w: 2
+                },
+                {
+                    id: 31,
+                    w: 1
+                },
+                {
+                    id: 32,
+                    w: 4
+                },
+                {
+                    id: 33,
+                    w: 2
+                },
+                {
+                    id: 34,
+                    w: 1
+                },
             ],
             items: [
                 {
@@ -134,35 +158,47 @@ export const config: WorldConfig = {
             pokemons: [
                 {
                     id: 10,
-                    p: 20
+                    w: 4
                 },
                 {
                     id: 11,
-                    p: 30
+                    w: 2
                 },
                 {
                     id: 12,
-                    p: 40
+                    w: 1
                 },
                 {
                     id: 13,
-                    p: 60
+                    w: 4
                 },
                 {
                     id: 14,
-                    p: 70
+                    w: 2
                 },
                 {
                     id: 15,
-                    p: 80
+                    w: 1
+                },
+                {
+                    id: 43,
+                    w: 4
+                },
+                {
+                    id: 44,
+                    w: 2
+                },
+                {
+                    id: 45,
+                    w: 1
                 },
                 {
                     id: 46,
-                    p: 90
+                    w: 4
                 },
                 {
                     id: 47,
-                    p: 100
+                    w: 2
                 }
             ],
             items: [
@@ -186,7 +222,7 @@ export const config: WorldConfig = {
         MOUNTAIN: {
             type: "MOUNTAIN",
             color: "#535047",
-            "items": [
+            items: [
                 {
                     type: "ROCK_1",
                     "p": 5,
@@ -201,31 +237,31 @@ export const config: WorldConfig = {
             pokemons: [
                 {
                     id: 74,
-                    p: 20
+                    w: 4
                 },
                 {
                     id: 75,
-                    p: 30
+                    w: 2
                 },
                 {
                     id: 76,
-                    p: 35
+                    w: 1
                 },
                 {
                     id: 95,
-                    p: 55
+                    w: 3
                 },
                 {
                     id: 111,
-                    p: 65
+                    w: 3
                 },
                 {
                     id: 112,
-                    p: 75
+                    w: 1
                 },
                 {
                     id: 185,
-                    p: 100
+                    w: 2
                 }
             ]
         },
@@ -235,31 +271,39 @@ export const config: WorldConfig = {
             pokemons: [
                 {
                     id: 124,
-                    p: 20
+                    w: 3
                 },
                 {
                     id: 215,
-                    p: 30
+                    w: 3
+                },
+                {
+                    id: 216,
+                    w: 4
+                },
+                {
+                    id: 217,
+                    w: 1
                 },
                 {
                     id: 220,
-                    p: 35
+                    w: 4
                 },
                 {
                     id: 221,
-                    p: 55
+                    w: 1
                 },
                 {
                     id: 225,
-                    p: 65
+                    w: 3
                 },
                 {
                     id: 238,
-                    p: 75
+                    w: 3
                 },
                 {
                     id: 361,
-                    p: 100
+                    w: 3
                 }
             ],
             items: []
@@ -273,7 +317,7 @@ export const config: WorldConfig = {
             density: 500
         },
         NATURE: {
-            density: 50
+            density: 40
         },
         HUMIDITY: {
             density: 40
@@ -311,7 +355,7 @@ export const config: WorldConfig = {
                         factor: "NATURE",
                         sub: [
                             {
-                                threshold: 0.8,
+                                threshold: 0.7,
                                 type: "PLAIN",
                             },
                             {

@@ -1,11 +1,23 @@
 import {csv} from 'd3-fetch'
-import {BiomeConfig} from "./biomes";
-import {randomInt} from "../utils/random";
+import {BiomeConfig, PokemonConfig} from "./biomes";
+import {randomUniform} from "../utils/random";
 import {Generations, Pokemon as SmogonPokemon} from "@smogon/calc";
 
 const POKEMON_GEN = Generations.get(9)
 
-const randomPokemonId = randomInt(1, 493)
+const randomizer = randomUniform()
+
+const randomPokemon = (biome: BiomeConfig) => {
+    if (!biome.pokemons || biome.pokemons.length < 1) return null
+
+    const totalWeight = biome.pokemons.reduce((acc, pConf) => acc + pConf.w, 0);
+    const random = randomizer() * totalWeight;
+    let total = 0;
+    return biome.pokemons.find(pConf => {
+        total += pConf.w;
+        return random <= total;
+    })
+}
 
 export type PokemonData = {
     id: number,
@@ -25,19 +37,18 @@ export class Pokedex {
     }
 
     generateRandomPokemon(biome: BiomeConfig) {
-        const randomizer = randomInt(1, 100)
-        const config = biome.pokemons?.find(pConf => randomizer() < pConf.p)
+        const config = randomPokemon(biome)
+        if (!config) return null
 
-        const id = config?.id ?? randomPokemonId()
-        const pokedexEntry = this.getEntry(id)
+        const pokedexEntry = this.getEntry(config.id)
         try {
             return {
-                id,
+                id: config.id,
                 generalData: pokedexEntry,
                 battleData: new SmogonPokemon(POKEMON_GEN, pokedexEntry["Pokemon"])
             } as PokemonData
         } catch (e) {
-            console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${id})`, e)
+            console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${config.id})`, e)
         }
 
         return null
