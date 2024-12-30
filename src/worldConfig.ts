@@ -38,15 +38,34 @@ export const config: WorldConfig = {
         }
     ],
     biomes: {
-        DESERT: {
-            type: "DESERT",
+        BEACH: {
+            type: "BEACH",
             color: "#d5c8af",
             pokemons: [],
             items: []
         },
+        DEEP_OCEAN: {
+            type: "DEEP_OCEAN",
+            color: "#093970",
+            pokemons: [
+                {
+                    id: 7,
+                    p: 20
+                },
+                {
+                    id: 8,
+                    p: 30
+                },
+                {
+                    id: 9,
+                    p: 40
+                }
+            ],
+            items: []
+        },
         OCEAN: {
-            "type": "OCEAN",
-            "color": "#2469b8",
+            type: "OCEAN",
+            color: "#2469b8",
             pokemons: [
                 {
                     id: 7,
@@ -64,8 +83,8 @@ export const config: WorldConfig = {
             items: []
         },
         PLAIN: {
-            "type": "PLAIN",
-            "color": "#63a131",
+            type: "PLAIN",
+            color: "#63a131",
             pokemons: [
                 {
                     id: 16,
@@ -98,20 +117,20 @@ export const config: WorldConfig = {
             ],
             items: [
                 {
-                    "type": "tile006",
+                    type: "tile006",
                     "p": 1,
                     "scale": 2
                 },
                 {
-                    "type": "tile010",
+                    type: "tile010",
                     "p": 2,
                     "scale": 2
                 }
             ]
         },
         FOREST: {
-            "type": "FOREST",
-            "color": "#3e6c15",
+            type: "FOREST",
+            color: "#3e6c15",
             pokemons: [
                 {
                     id: 10,
@@ -165,16 +184,16 @@ export const config: WorldConfig = {
             ]
         },
         MOUNTAIN: {
-            "type": "MOUNTAIN",
-            "color": "#535047",
+            type: "MOUNTAIN",
+            color: "#535047",
             "items": [
                 {
-                    "type": "ROCK_1",
+                    type: "ROCK_1",
                     "p": 5,
                     "scale": 0.2
                 },
                 {
-                    "type": "ROCK_2",
+                    type: "ROCK_2",
                     "p": 10,
                     "scale": 0.2
                 }
@@ -211,8 +230,8 @@ export const config: WorldConfig = {
             ]
         },
         SNOWY_MOUNTAIN: {
-            "type": "SNOWY_MOUNTAIN",
-            "color": "#ffffff",
+            type: "SNOWY_MOUNTAIN",
+            color: "#ffffff",
             pokemons: [
                 {
                     id: 124,
@@ -246,46 +265,80 @@ export const config: WorldConfig = {
             items: []
         }
     },
+    factors: {
+        ISLANDS: {
+            density: 100
+        },
+        HEIGHT: {
+            density: 500
+        },
+        NATURE: {
+            density: 50
+        },
+        HUMIDITY: {
+            density: 40
+        }
+    },
     terrain: {
-        "sub": [
+        factor: "HEIGHT",
+        sub: [
             {
-                "threshold": 0.05,
-                "sub": [
-                    {
-                        "type": "DESERT",
-                        "threshold": 0.01
-                    },
-                    {
-                        "type": "OCEAN",
-                        "threshold": 1,
-                    }
-                ]
+                threshold: 0.45,
+                type: "DEEP_OCEAN",
             },
             {
-                "threshold": 1,
-                "sub": [
+                threshold: 0.55,
+                type: "OCEAN",
+            },
+            {
+                threshold: 0.58,
+                type: "BEACH"
+            },
+            {
+                threshold: 0.63,
+                type: "PLAIN"
+            },
+            {
+                threshold: 0.9,
+                factor: "HUMIDITY",
+                sub: [
                     {
-                        "threshold": 0.9,
-                        "sub": [
+                        threshold: 0.1,
+                        type: "OCEAN",
+                    },
+                    {
+                        threshold: 1,
+                        factor: "NATURE",
+                        sub: [
                             {
-                                "type": "PLAIN",
-                                "threshold": 0.8,
+                                threshold: 0.8,
+                                type: "PLAIN",
                             },
                             {
-                                "type": "FOREST",
-                                "threshold": 1,
+                                threshold: 1,
+                                type: "FOREST",
                             }
                         ]
                     },
+                ]
+            },
+            {
+                threshold: 0.98,
+                factor: "HUMIDITY",
+                sub: [
                     {
-                        "type": "MOUNTAIN",
-                        "threshold": 0.985,
+                        threshold: 0.1,
+                        type: "OCEAN",
                     },
                     {
-                        "type": "SNOWY_MOUNTAIN",
-                        "threshold": 1,
-                    }
-                ]
+                        threshold: 1,
+                        type: "MOUNTAIN",
+                    },
+                ],
+            },
+            {
+                threshold: 1,
+                type: "SNOWY_MOUNTAIN",
             }
         ]
     }

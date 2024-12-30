@@ -1,6 +1,6 @@
 import {BiomeConfig, WorldConfig} from "./biomes";
 import {Item} from "./item";
-import {FBMGenerator, PerlinNoise} from "../utils/perlin";
+import {FBMGenerator} from "../utils/perlin";
 import {randomInt} from "../utils/random";
 import {Normal} from "distributions";
 import {Position} from "./types";
@@ -35,47 +35,40 @@ export class Chunk {
 
 export class ChunksHolder {
     private readonly chunks = new Map2D<Chunk>();
-    private readonly generators: FBMGenerator[];
+    private readonly generators: Map<string, FBMGenerator> = new Map();
     private readonly randomizer = randomInt(1, 100);
     private readonly normalDistribution = Normal(0, 0.22);
 
     constructor(
         private readonly config: WorldConfig
     ) {
-        const depth = this.getBiomesDepth();
-
-        this.generators = Array.from({length: depth}).map(() => new FBMGenerator(50, 2));
-    }
-
-    private getBiomesDepth() {
-        const nodes = [{value: this.config.terrain, depth: 0}] || [];
-        let maxDepth = 0;
-        while (nodes.length > 0) {
-            const node = nodes.pop();
-            maxDepth = Math.max(maxDepth, node.depth);
-            if (node.value.sub) {
-                for (const sub of node.value.sub) {
-                    nodes.push({value: sub, depth: node.depth + 1});
-                }
-            }
+        for (let factor in this.config.factors) {
+            const density = this.config.factors[factor].density;
+            this.generators.set(factor, new FBMGenerator(density, 2));
         }
-        return maxDepth;
     }
 
-    private extractTiles(result: PerlinNoise[]): BiomeConfig[][] {
+    private extractTiles(n: number, m: number): BiomeConfig[][] {
         const {config, normalDistribution} = this;
-        return result[0].noises
-            .map((line, x) => line
-                .map((_, y) => {
-                    let terrain = config.terrain;
-                    let depth = 0;
-                    while (terrain.sub) {
-                        const noise = result[depth].noises[x][y]
-                        terrain = terrain.sub?.find(b => noise < normalDistribution.inv(b.threshold));
-                        depth++;
-                    }
-                    return config.biomes[terrain.type];
-                }))
+        const noises: { [key: string]: number[][] } = {}
+        for (let [key, g] of this.generators) {
+            noises[key] = g.getNoiseField(n * config.chunkSize, m * config.chunkSize, config.chunkSize, config.chunkSize).noises
+        }
+
+        const result: BiomeConfig[][] = [];
+        for (let x = 0; x < config.chunkSize; x++) {
+            const line = [];
+            for (let y = 0; y < config.chunkSize; y++) {
+                let terrain = config.terrain;
+                while (terrain.sub) {
+                    const noise = noises[terrain.factor][x][y]
+                    terrain = terrain.sub?.find(b => noise < normalDistribution.inv(b.threshold));
+                }
+                line.push(config.biomes[terrain.type]);
+            }
+            result.push(line);
+        }
+        return result;
     }
 
     private generateItems(tiles: BiomeConfig[][], n: number, m: number) {
@@ -113,15 +106,13 @@ export class ChunksHolder {
 
     private getChunkAt(n: number, m: number) {
         const {chunks} = this;
-        return chunks.getOrSetDefault(n, m, () => this.generate(n, m));
+        return chunks.getOrLoad(n, m, () => this.generate(n, m));
     }
 
     private generate(n: number, m: number) {
-        const {generators, config: {chunkSize, tileSize}} = this;
-        const noises = generators
-            .map(generator => generator.getNoiseField(n * chunkSize, m * chunkSize, chunkSize, chunkSize));
+        const {config: {chunkSize, tileSize}} = this;
 
-        const tiles = this.extractTiles(noises);
+        const tiles = this.extractTiles(n, m);
         const items = this.generateItems(tiles, n, m);
 
         return new Chunk(n, m, chunkSize, tileSize, tiles, items);

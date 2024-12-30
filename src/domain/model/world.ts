@@ -47,9 +47,11 @@ export class World {
             const randomPosition = randomInt(-maxDistanceToCenter, maxDistanceToCenter);
             const position = {x: this.center.x + randomPosition(), y: this.center.y + randomPosition()};
             const pokemon = this.generatePokemonAt(position)
-            added.push(pokemon);
-            this.pokemons.push(...added);
+            if (pokemon) {
+                added.push(pokemon);
+            }
         }
+        this.pokemons.push(...added);
         return added;
     }
 
@@ -95,6 +97,9 @@ export class World {
 
         const biome = chunk.getTile(position);
         const pokemonData = pokedex.generateRandomPokemon(biome);
-        return new Pokemon(pokemonData, position, Direction.UP)
+        if (pokemonData) {
+            return new Pokemon(pokemonData, position, Direction.UP);
+        }
+        return null;
     }
 }

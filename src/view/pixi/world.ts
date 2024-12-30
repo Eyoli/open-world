@@ -53,15 +53,13 @@ export class WorldContainer {
             world.center = this.viewport.toWorld(position);
             console.log("Set center at", world.center);
 
-            this.backgroundLayer.children.forEach((child) => {
+            this.backgroundLayer.removeChildren().forEach((child) => {
                 child.destroy({children: true, context: true, texture: true});
-            })
-            this.backgroundLayer.removeChildren();
+            });
 
-            this.itemLayer.children.forEach((child) => {
+            this.itemLayer.removeChildren().forEach((child) => {
                 child.destroy({children: true, context: true, texture: true});
-            })
-            this.itemLayer.removeChildren();
+            });
             this.renderChunks()
         });
     }
