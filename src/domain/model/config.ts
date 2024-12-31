@@ -1,9 +1,3 @@
-export type ItemConfig = {
-    type: string
-    p: number
-    scale?: number
-}
-
 export type WorldConfig = {
     pokemons: PokemonGenerationConfig
     chunkSize: number
@@ -26,8 +20,15 @@ export type PokemonGenerationConfig = {
 export type BiomeConfig = {
     type: string
     color: string
+    pItem: number
     items: ItemConfig[]
     pokemons: PokemonConfig[]
+}
+
+export type ItemConfig = {
+    type: string
+    w: number
+    scale?: number
 }
 
 export type TerrainConfig = {
@@ -38,6 +39,6 @@ export type TerrainConfig = {
 }
 
 export type PokemonConfig = {
-    id: number
+    ids: number[]
     w: number
 }

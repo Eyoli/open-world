@@ -1,5 +1,5 @@
 import {Assets} from "pixi.js";
-import {WorldConfig} from "../../domain/model/biomes";
+import {WorldConfig} from "../../domain/model/config";
 
 export const loadAssets = async (config: WorldConfig) => {
     config.assets.forEach(asset => {

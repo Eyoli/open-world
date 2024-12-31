@@ -1,5 +1,5 @@
 import {Direction, Position} from "./types";
-import {WorldConfig} from "./biomes";
+import {WorldConfig} from "./config";
 import {ChunksHolder} from "./chunk";
 import {Pokedex} from "./pokedex";
 import {Pokemon} from "./pokemon";

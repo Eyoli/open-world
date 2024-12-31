@@ -1,7 +1,7 @@
-import {BiomeConfig, WorldConfig} from "./biomes";
+import {BiomeConfig, WorldConfig} from "./config";
 import {Item} from "./item";
 import {FBMGenerator} from "../utils/perlin";
-import {randomInt} from "../utils/random";
+import {randomUniform} from "../utils/random";
 import {Normal} from "distributions";
 import {Position} from "./types";
 import {Map2D} from "../utils/collections";
@@ -36,7 +36,7 @@ export class Chunk {
 export class ChunksHolder {
     private readonly chunks = new Map2D<Chunk>();
     private readonly generators: Map<string, FBMGenerator> = new Map();
-    private readonly randomizer = randomInt(1, 100);
+    private readonly randomizer = randomUniform();
     private readonly normalDistribution = Normal(0, 0.22);
 
     constructor(
@@ -75,10 +75,21 @@ export class ChunksHolder {
         const {config: {chunkSize}, randomizer} = this;
         return tiles
             .flatMap((line, x) => line
-                .map((biome, y) => ({
-                    x, y, item: biome.items?.find(item => randomizer() < item.p)
-                }))
-                .filter(({item}) => item)
+                .map((biome, y) => {
+                    if (randomizer() > biome.pItem) return null;
+
+                    const totalWeight = biome.items.reduce((acc, pConf) => acc + pConf.w, 0);
+                    const random = randomizer() * totalWeight;
+                    let total = 0;
+                    return {
+                        x, y,
+                        item: biome.items.find(pConf => {
+                            total += pConf.w;
+                            return random <= total;
+                        })
+                    };
+                })
+                .filter((item) => item)
                 .map(({x, y, item}) => new Item([n * chunkSize + x, m * chunkSize + y], item.type, item.scale || 1)));
     }
 

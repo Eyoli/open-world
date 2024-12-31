@@ -11,7 +11,6 @@ export class WorldContainer {
     private readonly container: Container<ContainerChild>;
     private readonly backgroundLayer: Container<ContainerChild>;
     private readonly itemLayer: Container<ContainerChild>;
-    private readonly pokemonLayer: Container<PokemonSprite>;
     private readonly collisionLayer: Graphics = new Graphics();
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
@@ -32,9 +31,6 @@ export class WorldContainer {
         this.itemLayer = new Container();
         this.container.addChild(this.itemLayer);
 
-        this.pokemonLayer = new Container();
-        this.container.addChild(this.pokemonLayer);
-
         //this.container.addChild(this.collisionLayer);
 
         this.viewport = createAdminViewport(app, width, height);
@@ -49,17 +45,18 @@ export class WorldContainer {
         this.renderChunks()
 
         this.viewport.on('pointerdown', (event) => {
-            const position = {x: event.x, y: event.y};
-            world.center = this.viewport.toWorld(position);
+            world.center = this.viewport.toWorld({x: event.x, y: event.y});
             console.log("Set center at", world.center);
 
             this.backgroundLayer.removeChildren().forEach((child) => {
                 child.destroy({children: true, context: true, texture: true});
             });
 
-            this.itemLayer.removeChildren().forEach((child) => {
-                child.destroy({children: true, context: true, texture: true});
-            });
+            this.itemLayer.removeChildren()
+                .filter((child) => !(child instanceof PokemonSprite))
+                .forEach((child) => {
+                    child.destroy({children: true, context: true, texture: true});
+                });
             this.renderChunks()
         });
     }
@@ -70,7 +67,7 @@ export class WorldContainer {
         for (const pokemon of world.addPokemon()) {
             const pokemonSprite = createPokemonSprite(pokemon);
             this.pokemons.set(pokemon, pokemonSprite);
-            this.pokemonLayer.addChild(pokemonSprite);
+            this.itemLayer.addChild(pokemonSprite);
         }
 
         world.update()
@@ -78,7 +75,8 @@ export class WorldContainer {
         world.removePokemons().forEach((pokemon) => {
             const pokemonSprite = this.pokemons.get(pokemon);
             this.pokemons.delete(pokemon);
-            this.pokemonLayer.removeChild(pokemonSprite);
+            this.itemLayer.removeChild(pokemonSprite);
+            pokemonSprite.destroy();
         })
 
         for (const [_, pokemonSprite] of this.pokemons) {
@@ -94,16 +92,17 @@ export class WorldContainer {
                 this.collisionLayer.rect(x1, y1, x2 - x1, y2 - y1);
                 this.collisionLayer.stroke({color: 0xff0000, width: 5});
             }
-        })
+        });
+        this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
     }
 
     private renderChunkBackground(chunk: Chunk) {
         const {world: {config: {tileSize}}} = this;
 
-        const graphics = new Graphics();
-
         const offsetX = chunk.n * chunk.size * tileSize;
         const offsetY = chunk.m * chunk.size * tileSize;
+        const graphics = new Graphics();
+
         for (const {x, y, biome} of chunk.enumerateTiles()) {
             graphics.rect(offsetX + x * tileSize, offsetY + y * tileSize, tileSize, tileSize);
             graphics.fill(biome.color);
@@ -116,18 +115,15 @@ export class WorldContainer {
         const {world} = this;
 
         for (const chunk of world.getVisibleChunks()) {
-            const itemsContainer = new Container();
-
             for (const item of chunk.items) {
                 const itemView = createItemView(item, world);
-                itemsContainer.addChild(itemView);
+                this.itemLayer.addChild(itemView);
             }
 
             this.backgroundLayer.addChild(this.renderChunkBackground(chunk));
-            this.itemLayer.addChild(itemsContainer);
 
             for (const pokemonSprite of this.pokemons.values()) {
-                this.pokemonLayer.addChild(pokemonSprite);
+                this.itemLayer.addChild(pokemonSprite);
             }
         }
 
@@ -139,5 +135,5 @@ const createItemView = (item: Item, world: World) => new Sprite({
     texture: Texture.from(item.type),
     x: item.position[0] * world.config.tileSize,
     y: item.position[1] * world.config.tileSize,
-    scale: item.scale,
+    scale: item.scale
 });

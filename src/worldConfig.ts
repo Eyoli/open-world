@@ -1,4 +1,4 @@
-import {WorldConfig} from "./domain/model/biomes";
+import {WorldConfig} from "./domain/model/config";
 
 export const config: WorldConfig = {
     pokemons: {
@@ -9,22 +9,6 @@ export const config: WorldConfig = {
     tileSize: 50,
     assets: [
         {
-            alias: "TREE_1",
-            src: "dist/images/tree1.png"
-        },
-        {
-            alias: "TREE_2",
-            src: "dist/images/tree2.png"
-        },
-        {
-            alias: "ROCK_1",
-            src: "dist/images/rock1.png"
-        },
-        {
-            alias: "ROCK_2",
-            src: "dist/images/rock2.png"
-        },
-        {
             alias: "UNKNOWN",
             src: "dist/images/pokemon/unknown.png"
         },
@@ -34,30 +18,49 @@ export const config: WorldConfig = {
         },
         {
             alias: "TREES",
-            src: "dist/images/trees/trees.json"
+            src: "dist/images/trees/trees_2.json"
         }
     ],
     biomes: {
         BEACH: {
             type: "BEACH",
             color: "#d5c8af",
+            pItem: 0.005,
+            pokemons: [],
+            items: [
+                {
+                    type: "BBCA3668-37E6-4401-8F86-F91792DC4CD3",
+                    w: 1,
+                    scale: 2
+                }
+            ]
+        },
+        DESERT: {
+            type: "Desert",
+            color: "#d5c8af",
+            pItem: 0,
             pokemons: [],
             items: []
         },
         DEEP_OCEAN: {
             type: "DEEP_OCEAN",
             color: "#093970",
+            pItem: 0,
             pokemons: [
                 {
-                    id: 7,
+                    ids: [72, 90],
+                    w: 10
+                },
+                {
+                    ids: [73, 91, 116],
                     w: 4
                 },
                 {
-                    id: 8,
+                    ids: [117],
                     w: 2
                 },
                 {
-                    id: 9,
+                    ids: [9, 130, 131],
                     w: 1
                 }
             ],
@@ -66,17 +69,38 @@ export const config: WorldConfig = {
         OCEAN: {
             type: "OCEAN",
             color: "#2469b8",
+            pItem: 0,
             pokemons: [
                 {
-                    id: 7,
+                    ids: [72, 90],
+                    w: 10
+                },
+                {
+                    ids: [7, 73, 91,],
                     w: 4
                 },
                 {
-                    id: 8,
+                    ids: [8],
+                    w: 2
+                }
+            ],
+            items: []
+        },
+        LAKE: {
+            type: "Lake",
+            color: "#2d73c6",
+            pItem: 0,
+            pokemons: [
+                {
+                    ids: [7, 60],
+                    w: 4
+                },
+                {
+                    ids: [8, 61],
                     w: 2
                 },
                 {
-                    id: 9,
+                    ids: [9, 62],
                     w: 1
                 }
             ],
@@ -85,136 +109,122 @@ export const config: WorldConfig = {
         PLAIN: {
             type: "PLAIN",
             color: "#63a131",
+            pItem: 0.01,
             pokemons: [
                 {
-                    id: 16,
+                    ids: [16, 19, 21, 22, 29, 32],
                     w: 4
                 },
                 {
-                    id: 17,
+                    ids: [17, 20, 30, 33],
                     w: 2
                 },
                 {
-                    id: 18,
+                    ids: [18, 31, 34],
                     w: 1
-                },
-                {
-                    id: 19,
-                    w: 4
-                },
-                {
-                    id: 20,
-                    w: 2
-                },
-                {
-                    id: 21,
-                    w: 4
-                },
-                {
-                    id: 22,
-                    w: 4
-                },
-                {
-                    id: 29,
-                    w: 4
-                },
-                {
-                    id: 30,
-                    w: 2
-                },
-                {
-                    id: 31,
-                    w: 1
-                },
-                {
-                    id: 32,
-                    w: 4
-                },
-                {
-                    id: 33,
-                    w: 2
-                },
-                {
-                    id: 34,
-                    w: 1
-                },
+                }
             ],
             items: [
                 {
-                    type: "tile006",
-                    "p": 1,
-                    "scale": 2
+                    type: "3569D858-DDBE-4996-B084-DC98A92A4229",
+                    w: 1,
+                    scale: 2
                 },
                 {
-                    type: "tile010",
-                    "p": 2,
-                    "scale": 2
+                    type: "7A9B1D07-B0DB-4F3D-88FE-5DEC0500D315",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "8798078E-745C-4258-AEBD-D14925A27365",
+                    w: 1,
+                    scale: 2
                 }
             ]
         },
         FOREST: {
             type: "FOREST",
             color: "#3e6c15",
+            pItem: 0.25,
             pokemons: [
                 {
-                    id: 10,
+                    ids: [10, 13, 43, 46],
                     w: 4
                 },
                 {
-                    id: 11,
+                    ids: [11, 14, 44, 47],
                     w: 2
                 },
                 {
-                    id: 12,
+                    ids: [12, 15, 45],
                     w: 1
                 },
-                {
-                    id: 13,
-                    w: 4
-                },
-                {
-                    id: 14,
-                    w: 2
-                },
-                {
-                    id: 15,
-                    w: 1
-                },
-                {
-                    id: 43,
-                    w: 4
-                },
-                {
-                    id: 44,
-                    w: 2
-                },
-                {
-                    id: 45,
-                    w: 1
-                },
-                {
-                    id: 46,
-                    w: 4
-                },
-                {
-                    id: 47,
-                    w: 2
-                }
             ],
             items: [
                 {
-                    type: "tile007",
-                    p: 10,
+                    type: "3569D858-DDBE-4996-B084-DC98A92A4229",
+                    w: 1,
                     scale: 2
                 },
                 {
-                    type: "tile008",
-                    p: 20,
+                    type: "7A9B1D07-B0DB-4F3D-88FE-5DEC0500D315",
+                    w: 1,
                     scale: 2
                 },
                 {
-                    type: "tile006",
-                    p: 10,
+                    type: "38484192-00F7-4C2C-A600-B3734ACB9CE2",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "AD6D7017-39FB-4D29-9DDA-EE5C734DCB01",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "10E01ABD-1381-4141-A1F2-F5EB750B1CD6",
+                    w: 1,
+                    scale: 2
+                }
+            ]
+        },
+        HIGH_FOREST: {
+            type: "High forest",
+            color: "#535047",
+            pItem: 0.25,
+            pokemons: [
+                {
+                    ids: [10, 13, 43, 46],
+                    w: 4
+                },
+                {
+                    ids: [11, 14, 44, 47],
+                    w: 2
+                },
+                {
+                    ids: [12, 15, 45],
+                    w: 1
+                },
+            ],
+            items: [
+                {
+                    type: "E363FE54-D661-4B7C-A5B4-B4EBC9CE6F1A",
+                    w: 2,
+                    scale: 2
+                },
+                {
+                    type: "9BBFE714-8AC5-4B98-8E8B-80DB5934297E",
+                    w: 3,
+                    scale: 2
+                },
+                {
+                    type: "D7381202-8218-4F32-A364-337E0B15D8AD",
+                    w: 3,
+                    scale: 2
+                },
+                {
+                    type: "C34B7581-3176-4E5E-A7BF-8A90927DC70C",
+                    w: 1,
                     scale: 2
                 }
             ]
@@ -222,96 +232,73 @@ export const config: WorldConfig = {
         MOUNTAIN: {
             type: "MOUNTAIN",
             color: "#535047",
+            pItem: 0.04,
             items: [
                 {
-                    type: "ROCK_1",
-                    "p": 5,
-                    "scale": 0.2
+                    type: "D7381202-8218-4F32-A364-337E0B15D8AD",
+                    w: 1,
+                    scale: 2
                 },
                 {
-                    type: "ROCK_2",
-                    "p": 10,
-                    "scale": 0.2
+                    type: "4DCFED99-036F-4A27-8D90-B00908595F6C",
+                    w: 2,
+                    scale: 2
+                },
+                {
+                    type: "C34B7581-3176-4E5E-A7BF-8A90927DC70C",
+                    w: 2,
+                    scale: 2
                 }
             ],
             pokemons: [
                 {
-                    id: 74,
+                    ids: [74],
                     w: 4
                 },
                 {
-                    id: 75,
-                    w: 2
-                },
-                {
-                    id: 76,
-                    w: 1
-                },
-                {
-                    id: 95,
+                    ids: [95, 111],
                     w: 3
                 },
                 {
-                    id: 111,
-                    w: 3
-                },
-                {
-                    id: 112,
-                    w: 1
-                },
-                {
-                    id: 185,
+                    ids: [75, 185],
                     w: 2
+                },
+                {
+                    ids: [76, 112],
+                    w: 1
                 }
             ]
         },
-        SNOWY_MOUNTAIN: {
-            type: "SNOWY_MOUNTAIN",
-            color: "#ffffff",
+        GLACIER: {
+            type: "GLACIER",
+            color: "#96dadd",
+            pItem: 0.005,
             pokemons: [
                 {
-                    id: 124,
-                    w: 3
-                },
-                {
-                    id: 215,
-                    w: 3
-                },
-                {
-                    id: 216,
+                    ids: [216, 220],
                     w: 4
                 },
                 {
-                    id: 217,
+                    ids: [124, 215, 225, 238, 361],
+                    w: 3
+                },
+                {
+                    ids: [217, 221],
                     w: 1
-                },
-                {
-                    id: 220,
-                    w: 4
-                },
-                {
-                    id: 221,
-                    w: 1
-                },
-                {
-                    id: 225,
-                    w: 3
-                },
-                {
-                    id: 238,
-                    w: 3
-                },
-                {
-                    id: 361,
-                    w: 3
                 }
             ],
-            items: []
+            items: [
+                {
+                    type: "5949BC48-E073-438E-B2C7-0D85A1AFAD54",
+                    w: 1,
+                    scale: 2
+                }
+            ]
         }
     },
     factors: {
-        ISLANDS: {
-            density: 100
+        CLIMATE: {
+            density: 800
         },
         HEIGHT: {
             density: 500
@@ -347,11 +334,7 @@ export const config: WorldConfig = {
                 factor: "HUMIDITY",
                 sub: [
                     {
-                        threshold: 0.1,
-                        type: "OCEAN",
-                    },
-                    {
-                        threshold: 1,
+                        threshold: 0.9,
                         factor: "NATURE",
                         sub: [
                             {
@@ -364,6 +347,10 @@ export const config: WorldConfig = {
                             }
                         ]
                     },
+                    {
+                        threshold: 1,
+                        type: "LAKE",
+                    },
                 ]
             },
             {
@@ -371,18 +358,38 @@ export const config: WorldConfig = {
                 factor: "HUMIDITY",
                 sub: [
                     {
-                        threshold: 0.1,
-                        type: "OCEAN",
+                        threshold: 0.9,
+                        factor: "NATURE",
+                        sub: [
+                            {
+                                threshold: 0.7,
+                                type: "MOUNTAIN",
+                            },
+                            {
+                                threshold: 1,
+                                type: "HIGH_FOREST",
+                            }
+                        ]
                     },
                     {
                         threshold: 1,
-                        type: "MOUNTAIN",
-                    },
+                        type: "LAKE",
+                    }
                 ],
             },
             {
                 threshold: 1,
-                type: "SNOWY_MOUNTAIN",
+                factor: "HUMIDITY",
+                sub: [
+                    {
+                        threshold: 0.9,
+                        type: "MOUNTAIN",
+                    },
+                    {
+                        threshold: 1,
+                        type: "GLACIER",
+                    }
+                ],
             }
         ]
     }

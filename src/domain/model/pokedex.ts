@@ -1,7 +1,7 @@
 import {csv} from 'd3-fetch'
-import {BiomeConfig, PokemonConfig} from "./biomes";
+import {BiomeConfig, PokemonConfig} from "./config";
 import {randomUniform} from "../utils/random";
-import {Generations, Pokemon as SmogonPokemon} from "@smogon/calc";
+import {Generations, Pokemon as SmogonPokemon, toID} from "@smogon/calc";
 
 const POKEMON_GEN = Generations.get(9)
 
@@ -9,14 +9,15 @@ const randomizer = randomUniform()
 
 const randomPokemon = (biome: BiomeConfig) => {
     if (!biome.pokemons || biome.pokemons.length < 1) return null
+    const unwrapped = biome.pokemons.flatMap((pConf: PokemonConfig) => pConf.ids.map(id => ({id, w: pConf.w})))
 
-    const totalWeight = biome.pokemons.reduce((acc, pConf) => acc + pConf.w, 0);
+    const totalWeight = unwrapped.reduce((acc, pConf) => acc + pConf.w, 0);
     const random = randomizer() * totalWeight;
     let total = 0;
-    return biome.pokemons.find(pConf => {
+    return unwrapped.find(pConf => {
         total += pConf.w;
         return random <= total;
-    })
+    }).id
 }
 
 export type PokemonData = {
@@ -37,18 +38,18 @@ export class Pokedex {
     }
 
     generateRandomPokemon(biome: BiomeConfig) {
-        const config = randomPokemon(biome)
-        if (!config) return null
+        const id = randomPokemon(biome)
+        if (!id) return null
 
-        const pokedexEntry = this.getEntry(config.id)
+        const pokedexEntry = this.getEntry(id)
         try {
             return {
-                id: config.id,
+                id,
                 generalData: pokedexEntry,
-                battleData: new SmogonPokemon(POKEMON_GEN, pokedexEntry["Pokemon"])
+                battleData: new SmogonPokemon(POKEMON_GEN, toID(pokedexEntry["Pokemon"]))
             } as PokemonData
         } catch (e) {
-            console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${config.id})`, e)
+            console.error(`Error generating pokemon ${toID(pokedexEntry["Pokemon"])} (${id})`, e)
         }
 
         return null
@@ -56,7 +57,9 @@ export class Pokedex {
 }
 
 export const loadNationalPokedex = async () => {
+    console.log(POKEMON_GEN.species.get(toID('bulbasaur')))
     const data: [p: string, value: any][] = (await csv('dist/pokemon-national-dex.csv'))
         .map((row, i) => [row["Nat"], row])
     return new Pokedex(new Map(data))
 }
+
