@@ -1,4 +1,4 @@
-import {Application, Container, ContainerChild, Graphics, Sprite, Texture} from "pixi.js";
+import {Application, Container, ContainerChild, Graphics, PointData, Sprite, Texture} from "pixi.js";
 import {Item} from "../../domain/model/item";
 import {World} from "../../domain/model/world";
 import {createAdminViewport} from "./controls";
@@ -14,9 +14,10 @@ export class WorldContainer {
     private readonly collisionLayer: Graphics = new Graphics();
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
+    private visibleChunks: Chunk[] = [];
 
     constructor(
-        app: Application,
+        private readonly app: Application,
         width: number,
         height: number,
         private readonly world: World
@@ -46,17 +47,6 @@ export class WorldContainer {
 
         this.viewport.on('pointerdown', (event) => {
             world.center = this.viewport.toWorld({x: event.x, y: event.y});
-            console.log("Set center at", world.center);
-
-            this.backgroundLayer.removeChildren().forEach((child) => {
-                child.destroy({children: true, context: true, texture: true});
-            });
-
-            this.itemLayer.removeChildren()
-                .filter((child) => !(child instanceof PokemonSprite))
-                .forEach((child) => {
-                    child.destroy({children: true, context: true, texture: true});
-                });
             this.renderChunks()
         });
     }
@@ -97,37 +87,68 @@ export class WorldContainer {
     }
 
     private renderChunkBackground(chunk: Chunk) {
-        const {world: {config: {tileSize}}} = this;
+        const chunkSize = chunk.size * chunk.tileSize;
+        const offsetX = chunk.n * chunkSize;
+        const offsetY = chunk.m * chunkSize;
 
-        const offsetX = chunk.n * chunk.size * tileSize;
-        const offsetY = chunk.m * chunk.size * tileSize;
-        const graphics = new Graphics();
+        for (const biome of chunk.biomes) {
+            const graphics = new Graphics();
 
-        for (const {x, y, biome} of chunk.enumerateTiles()) {
-            graphics.rect(offsetX + x * tileSize, offsetY + y * tileSize, tileSize, tileSize);
-            graphics.fill(biome.color);
+            const drawablePolygon = biome.polygon.map(([y, x]) => ({
+                x: offsetX + x * chunk.tileSize,
+                y: offsetY + y * chunk.tileSize
+            } as PointData));
+            graphics.poly(drawablePolygon);
+            graphics.fill(biome.config.color);
+            this.backgroundLayer.addChild(graphics);
+
+            // if (biome.config.type === "DEEP_OCEAN") {
+            //     const container = renderWater(this.app, chunkSize, chunkSize);
+            //     container.x = offsetX;
+            //     container.y = offsetY;
+            //     container.mask = graphics;
+            //     this.backgroundLayer.addChild(container);
+            // } else {
+            // }
         }
+    }
 
-        return graphics;
+    private clearChunks() {
+        this.backgroundLayer.removeChildren().forEach((child) => {
+            child.destroy({children: true, context: true, texture: true});
+        });
+
+        this.itemLayer.removeChildren()
+            .filter((child) => !(child instanceof PokemonSprite))
+            .forEach((child) => {
+                child.destroy({children: true, context: true, texture: true});
+            });
     }
 
     private renderChunks() {
         const {world} = this;
 
-        for (const chunk of world.getVisibleChunks()) {
-            for (const item of chunk.items) {
-                const itemView = createItemView(item, world);
-                this.itemLayer.addChild(itemView);
-            }
+        const updateVisibleChunks = Array.from(world.getVisibleChunks());
+        const ids = updateVisibleChunks.map(c => c.id());
+        if (this.visibleChunks.length == 0 || this.visibleChunks.some(c => !ids.includes(c.id()))) {
+            this.clearChunks();
 
-            this.backgroundLayer.addChild(this.renderChunkBackground(chunk));
+            console.log("Visible chunks updated");
+            for (const chunk of updateVisibleChunks) {
+                for (const item of chunk.items) {
+                    const itemView = createItemView(item, world);
+                    this.itemLayer.addChild(itemView);
+                }
 
-            for (const pokemonSprite of this.pokemons.values()) {
-                this.itemLayer.addChild(pokemonSprite);
+                this.renderChunkBackground(chunk);
+
+                for (const pokemonSprite of this.pokemons.values()) {
+                    this.itemLayer.addChild(pokemonSprite);
+                }
             }
+            this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
+            this.visibleChunks = updateVisibleChunks;
         }
-
-        this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
     }
 }
 

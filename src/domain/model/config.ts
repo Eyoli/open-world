@@ -10,6 +10,7 @@ export type WorldConfig = {
 
 export type FactorConfig = {
     density: number
+    pThresholds: number[]
 }
 
 export type PokemonGenerationConfig = {
@@ -33,7 +34,6 @@ export type ItemConfig = {
 
 export type TerrainConfig = {
     type?: string
-    threshold?: number
     factor?: string
     sub?: TerrainConfig[]
 }

@@ -32,7 +32,7 @@ export class Map2D<T> {
     private readonly map: Map<string, T> = new Map();
 
     getOrLoad = (x: number, y: number, defaultValue: () => T): T => {
-        const key = `${x}-${y}`;
+        const key = `${x},${y}`;
         if (!this.map.has(key)) {
             console.log("Loading", key);
             this.map.set(key, defaultValue());

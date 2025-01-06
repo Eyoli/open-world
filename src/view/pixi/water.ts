@@ -1,17 +1,13 @@
-import {Application, Assets, Container, DisplacementFilter, Sprite} from "pixi.js"
+import {Application, Container, DisplacementFilter, Sprite} from "pixi.js"
 
-export const renderWater = async (app: Application) => {
+export const renderWater = (app: Application, width: number, height: number) => {
     const container = new Container();
-    app.stage.addChild(container);
-
-    await Assets.load({alias: 'water-bg', src: 'dist/images/water-bg.jpeg'});
-    await Assets.load({alias: 'displacement', src: 'dist/images/displacement.jpeg'});
-
     const displacementSprite = Sprite.from('displacement');
+    console.log(displacementSprite.x)
 
     const waterBackground = Sprite.from('water-bg');
-    waterBackground.width = app.renderer.width;
-    waterBackground.height = app.renderer.height;
+    waterBackground.width = width;
+    waterBackground.height = height;
 
     container.addChild(displacementSprite);
     container.addChild(waterBackground);
@@ -22,9 +18,13 @@ export const renderWater = async (app: Application) => {
     displacementFilter.scale.y = 35;
 
     app.ticker.add(() => {
-        displacementSprite.x += 1;
-        if (displacementSprite.x > displacementSprite.width) {
-            displacementSprite.x = 0;
+        if (displacementSprite.position) {
+            displacementSprite.x += 1;
+            if (displacementSprite.x > displacementSprite.width) {
+                displacementSprite.x = 0;
+            }
         }
     });
+
+    return container;
 }

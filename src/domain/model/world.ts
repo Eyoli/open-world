@@ -95,11 +95,12 @@ export class World {
 
         const chunk = chunksHolder.getChunk(position);
 
-        const biome = chunk.getTile(position);
-        const pokemonData = pokedex.generateRandomPokemon(biome);
-        if (pokemonData) {
-            return new Pokemon(pokemonData, position, Direction.UP);
-        }
-        return null;
+        const biome = chunk.getBiome(position);
+        if (!biome) return null;
+
+        const pokemonData = pokedex.generateRandomPokemon(biome.config);
+        if (!pokemonData) return null;
+
+        return new Pokemon(pokemonData, position, Direction.UP);
     }
 }
