@@ -6,7 +6,7 @@ import {Normal} from "distributions";
 import {Position} from "./types";
 import {Map2D} from "../utils/collections";
 import {isoBands} from "marchingsquares";
-import {combineMasks, createMask} from "./matrix";
+import {amplifyInterval, applyMask, combineMasks, createMask} from "./matrix";
 import {polygonArea, polygonContains} from "d3-polygon"
 
 export class Biome {
@@ -89,20 +89,28 @@ export class ChunksHolder {
         const {config, normalDistribution} = this;
 
         const biomes: Biome[] = [];
-        const candidates: { node: TerrainConfig, mask: boolean[][] }[] = [{node: config.terrain, mask: null}];
+        const candidates: { node: TerrainConfig, factorNoises: number[][], mask: boolean[][] }[] = [{
+            node: config.terrain,
+            factorNoises: null,
+            mask: null
+        }];
         while (candidates.length > 0) {
-            const {node, mask} = candidates.pop();
+            const {node, factorNoises, mask} = candidates.pop();
             if (node.sub) {
                 let lowerBound = -1;
                 for (let i = 0; i < node.sub.length; i++) {
                     const sub = node.sub[i];
                     const upperBound = normalDistribution.inv(config.factors[node.factor].pThresholds[i]);
                     const subMask = createMask(noises[node.factor], [lowerBound, upperBound]);
-                    candidates.push({node: sub, mask: mask ? combineMasks(mask, subMask) : subMask});
+                    candidates.push({
+                        node: sub,
+                        factorNoises: noises[node.factor],
+                        mask: mask ? combineMasks(mask, subMask) : subMask
+                    });
                     lowerBound = upperBound;
                 }
             } else {
-                const bands = isoBands(mask, [1], [0.9])[0];
+                const bands = isoBands(applyMask(factorNoises, mask), [-1], [2])[0];
                 if (bands.length > 0) {
                     biomes.push(...bands.map((polygon: [number, number][]) => new Biome(polygon, config.biomes[node.type])));
                 }
