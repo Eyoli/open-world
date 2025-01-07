@@ -101,15 +101,27 @@ export class WorldContainer {
             graphics.poly(drawablePolygon);
             graphics.fill(biome.config.color);
             this.backgroundLayer.addChild(graphics);
+        }
+    }
 
-            // if (biome.config.type === "DEEP_OCEAN") {
-            //     const container = renderWater(this.app, chunkSize, chunkSize);
-            //     container.x = offsetX;
-            //     container.y = offsetY;
-            //     container.mask = graphics;
-            //     this.backgroundLayer.addChild(container);
-            // } else {
-            // }
+    private renderChunkCoutours(chunk: Chunk) {
+        const chunkSize = chunk.size * chunk.tileSize;
+        const offsetX = chunk.n * chunkSize;
+        const offsetY = chunk.m * chunkSize;
+
+        for (const polygons of Object.values(chunk.contours)) {
+            const graphics = new Graphics();
+            for (const polygon of polygons) {
+                const xxx = polygon.map(([y, x], i) => {
+                    return ({
+                        x: offsetX + x * chunk.tileSize,
+                        y: offsetY + y * chunk.tileSize
+                    } as PointData);
+                });
+                graphics.poly(xxx);
+                graphics.stroke({color: "red", width: 5});
+            }
+            this.backgroundLayer.addChild(graphics);
         }
     }
 
@@ -141,6 +153,7 @@ export class WorldContainer {
                 }
 
                 this.renderChunkBackground(chunk);
+                this.renderChunkCoutours(chunk);
 
                 for (const pokemonSprite of this.pokemons.values()) {
                     this.itemLayer.addChild(pokemonSprite);

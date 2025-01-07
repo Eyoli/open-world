@@ -35,21 +35,33 @@ export const applyMask = (a: number[][], mask: boolean[][]): number[][] => {
     for (let i = 0; i < a.length; i++) {
         const line = [];
         for (let j = 0; j < a[i].length; j++) {
-            line[j] = mask[i][j] ? a[i][j] : 1.1;
+            line[j] = mask[i][j] ? a[i][j] : 1.001;
         }
         result.push(line);
     }
     return result;
 }
 
-
 export const amplifyInterval = (a: number[][], thresholds: [number, number]): number[][] => {
     const result: number[][] = [];
-    const factor = 2 / (thresholds[1] - thresholds[0]);
+    const effectiveThresholds = [Math.max(-1, thresholds[0]), Math.min(1, thresholds[1])];
+    const factor = 2 / (effectiveThresholds[1] - effectiveThresholds[0]);
     for (let i = 0; i < a.length; i++) {
         const line = [];
         for (let j = 0; j < a[i].length; j++) {
-            line[j] = -1 + (a[i][j] - thresholds[0]) * factor;
+            line[j] = -1 + (a[i][j] - effectiveThresholds[0]) * factor;
+        }
+        result.push(line);
+    }
+    return result;
+}
+
+export const multiplyNoises = (a: number[][], b: number[][]) => {
+    const result: number[][] = [];
+    for (let i = 0; i < a.length; i++) {
+        const line = [];
+        for (let j = 0; j < a[i].length; j++) {
+            line[j] = a[i][j] * b[i][j];
         }
         result.push(line);
     }

@@ -3,11 +3,11 @@ import {Item} from "./item";
 import {FBMGenerator} from "../utils/perlin";
 import {randomUniform} from "../utils/random";
 import {Normal} from "distributions";
-import {Position} from "./types";
+import {Polygon, Position} from "./types";
 import {Map2D} from "../utils/collections";
 import {isoBands} from "marchingsquares";
-import {amplifyInterval, applyMask, combineMasks, createMask} from "./matrix";
-import {polygonArea, polygonContains} from "d3-polygon"
+import {applyMask, combineMasks, createMask} from "./matrix";
+import {polygonArea, polygonContains} from "d3-polygon";
 
 export class Biome {
     constructor(
@@ -24,6 +24,7 @@ export class Chunk {
         readonly size: number,
         readonly tileSize: number,
         readonly biomes: Biome[],
+        readonly contours: { [p: string]: Polygon[] },
         readonly items: Item[],
     ) {
     }
@@ -89,7 +90,11 @@ export class ChunksHolder {
         const {config, normalDistribution} = this;
 
         const biomes: Biome[] = [];
-        const candidates: { node: TerrainConfig, factorNoises: number[][], mask: boolean[][] }[] = [{
+        const candidates: {
+            node: TerrainConfig,
+            factorNoises: number[][],
+            mask: boolean[][]
+        }[] = [{
             node: config.terrain,
             factorNoises: null,
             mask: null
@@ -110,9 +115,9 @@ export class ChunksHolder {
                     lowerBound = upperBound;
                 }
             } else {
-                const bands = isoBands(applyMask(factorNoises, mask), [-1], [2])[0];
-                if (bands.length > 0) {
-                    biomes.push(...bands.map((polygon: [number, number][]) => new Biome(polygon, config.biomes[node.type])));
+                const polygons = isoBands(applyMask(factorNoises, mask), [-1], [2])[0];
+                if (polygons.length > 0) {
+                    biomes.push(...polygons.map((polygon: Polygon) => new Biome(polygon, config.biomes[node.type])));
                 }
             }
         }
@@ -164,6 +169,27 @@ export class ChunksHolder {
         return this.getChunkAt(n, m);
     }
 
+    private getContours(noises: { [key: string]: number[][] }): { [p: string]: Polygon[] } {
+        const contours: { [p: string]: Polygon[] } = {};
+
+        for (const [key, noise] of Object.entries(noises)) {
+            const factor = this.config.factors[key];
+            const lowerBound = factor.pThresholds.map(threshold => this.normalDistribution.inv(threshold));
+            lowerBound.pop();
+            lowerBound.unshift(-1);
+            const bandWidth = lowerBound.reduce((acc, threshold, i) => {
+                if (i > 0) {
+                    acc.push(threshold - lowerBound[i - 1]);
+                }
+                return acc;
+            }, []);
+            bandWidth.push(2);
+            contours[key] = isoBands(noise, lowerBound, bandWidth).flatMap((polygons: Polygon[]) => polygons);
+        }
+
+        return contours;
+    }
+
     private getChunkAt(n: number, m: number) {
         const {chunks} = this;
         return chunks.getOrLoad(n, m, () => this.generate(n, m));
@@ -173,10 +199,11 @@ export class ChunksHolder {
         const {config: {chunkSize, tileSize}} = this;
 
         const noises = this.getNoises(n, m);
+        const contours = this.getContours(noises);
         const tiles = this.extractTiles(noises);
         const biomes = this.extractBiomes(noises);
         const items = this.generateItems(tiles, n, m);
 
-        return new Chunk(n, m, chunkSize, tileSize, biomes, items);
+        return new Chunk(n, m, chunkSize, tileSize, biomes, contours, items);
     }
 }
