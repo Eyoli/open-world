@@ -22,6 +22,7 @@ export type PokemonGenerationConfig = {
 export type BiomeConfig = {
     type: string
     color: string
+    texture?: string
     pItem: number
     items: ItemConfig[]
     pokemons: PokemonConfig[]

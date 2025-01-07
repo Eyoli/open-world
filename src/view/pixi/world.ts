@@ -102,7 +102,11 @@ export class WorldContainer {
 
             const drawablePolygon = biome.polygon.map(([y, x]) => ({x, y} as PointData));
             graphics.poly(drawablePolygon);
-            graphics.fill(biome.config.color);
+            if (biome.config.texture) {
+                graphics.fill({texture: Texture.from(biome.config.texture), color: biome.config.color});
+            } else {
+                graphics.fill({color: biome.config.color});
+            }
             this.backgroundLayer.addChild(graphics);
         }
     }

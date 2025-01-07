@@ -18,13 +18,26 @@ export const config: WorldConfig = {
         },
         {
             alias: "TREES",
-            src: "dist/images/trees/trees_2.json"
+            src: "dist/images/trees.json"
+        },
+        {
+            alias: "BUILDINGS",
+            src: "dist/images/buildings.json"
+        },
+        {
+            alias: "deep_water",
+            src: "dist/images/deep_water.png"
+        },
+        {
+            alias: "sand",
+            src: "dist/images/sand.png"
         }
     ],
     biomes: {
         BEACH: {
             type: "Beach",
-            color: "#d5c8af",
+            color: "#e1d8c6",
+            texture: "sand",
             pItem: 0.005,
             pokemons: [],
             items: [
@@ -44,7 +57,8 @@ export const config: WorldConfig = {
         },
         DEEP_OCEAN: {
             type: "Deep ocean",
-            color: "#093970",
+            color: "#3374bf",
+            texture: "deep_water",
             pItem: 0,
             pokemons: [
                 {
@@ -68,7 +82,8 @@ export const config: WorldConfig = {
         },
         OCEAN: {
             type: "Ocean",
-            color: "#2469b8",
+            color: "#5a9ae3",
+            texture: "deep_water",
             pItem: 0,
             pokemons: [
                 {
@@ -88,7 +103,8 @@ export const config: WorldConfig = {
         },
         LAKE: {
             type: "Lake",
-            color: "#2d73c6",
+            color: "#ffffff",
+            texture: "deep_water",
             pItem: 0,
             pokemons: [
                 {
