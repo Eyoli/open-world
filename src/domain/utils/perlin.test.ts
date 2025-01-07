@@ -15,7 +15,7 @@ jest.mock('d3-random', () => {
 describe("PerlinNoiseGenerator", () => {
 
     it("should extend gradient field correctly (line translation)", () => {
-        const perlin = new FBMGenerator(10);
+        const perlin = new FBMGenerator(10, 2);
         const result = perlin.getNoiseField(0, 0, 2, 2);
         const nextResult = perlin.getNoiseField(1, 0, 2, 2);
     });

@@ -85,8 +85,8 @@ const noise2d = (field: GradientField, x: number, y: number) => {
 
 function fbm(field: GradientField, x: number, y: number, numOctaves: number = 1) {
     let result = 0.0;
-    let amplitude = 1.0;
-    let frequency = 0.005;
+    let amplitude = 0.5;
+    let frequency = 2;
     const lacunarity = 2.0;
     const gain = 0.5;
 
@@ -120,7 +120,7 @@ export class FBMGenerator {
 
     constructor(
         density: number,
-        private readonly fractalBrownianOctaves: number = 1
+        private readonly fractalBrownianOctaves: number
     ) {
         this.gradientField = new GradientField(density);
     }

@@ -33,11 +33,8 @@ export class Chunk {
         return `${this.n},${this.m}`;
     }
 
-    getBiome = (position: Position): Biome => {
-        const {n, m, size, tileSize} = this;
-        const x = position.x / tileSize - n * size
-        const y = position.y / tileSize - m * size
-        return this.biomes.find(biome => polygonContains(biome.polygon, [x, y]));
+    getBiome = ({x, y}: Position): Biome => {
+        return this.biomes.find(biome => polygonContains(biome.polygon, [y, x]));
     };
 }
 
@@ -51,8 +48,8 @@ export class ChunksHolder {
         private readonly config: WorldConfig
     ) {
         for (let factor in this.config.factors) {
-            const density = this.config.factors[factor].density;
-            this.generators.set(factor, new FBMGenerator(density, 2));
+            const {density, octaves} = this.config.factors[factor];
+            this.generators.set(factor, new FBMGenerator(density, octaves || 2));
         }
     }
 
@@ -86,16 +83,20 @@ export class ChunksHolder {
         return tiles;
     }
 
-    private extractBiomes(noises: { [key: string]: number[][] }): Biome[] {
-        const {config, normalDistribution} = this;
+    private extractBiomes(n: number, m: number, noises: { [key: string]: number[][] }): Biome[] {
+        const {config: {biomes, factors, terrain, chunkSize, tileSize}, normalDistribution} = this;
+        const offset = [
+            n * chunkSize * tileSize,
+            m * chunkSize * tileSize
+        ];
 
-        const biomes: Biome[] = [];
+        const newBiomes: Biome[] = [];
         const candidates: {
             node: TerrainConfig,
             factorNoises: number[][],
             mask: boolean[][]
         }[] = [{
-            node: config.terrain,
+            node: terrain,
             factorNoises: null,
             mask: null
         }];
@@ -105,7 +106,7 @@ export class ChunksHolder {
                 let lowerBound = -1;
                 for (let i = 0; i < node.sub.length; i++) {
                     const sub = node.sub[i];
-                    const upperBound = normalDistribution.inv(config.factors[node.factor].pThresholds[i]);
+                    const upperBound = normalDistribution.inv(factors[node.factor].pThresholds[i]);
                     const subMask = createMask(noises[node.factor], [lowerBound, upperBound]);
                     candidates.push({
                         node: sub,
@@ -117,12 +118,15 @@ export class ChunksHolder {
             } else {
                 const polygons = isoBands(applyMask(factorNoises, mask), [-1], [2])[0];
                 if (polygons.length > 0) {
-                    biomes.push(...polygons.map((polygon: Polygon) => new Biome(polygon, config.biomes[node.type])));
+                    newBiomes.push(...polygons.map((polygon: Polygon) => {
+                        const translatedPolygon: Polygon = polygon.map(([y, x]) => [offset[1] + y * tileSize, offset[0] + x * tileSize]);
+                        return new Biome(translatedPolygon, biomes[node.type]);
+                    }));
                 }
             }
         }
 
-        return biomes.sort((a, b) => polygonArea(a.polygon) - polygonArea(b.polygon));
+        return newBiomes.sort((a, b) => polygonArea(a.polygon) - polygonArea(b.polygon));
     }
 
     private generateItems(tiles: BiomeConfig[][], n: number, m: number) {
@@ -201,7 +205,7 @@ export class ChunksHolder {
         const noises = this.getNoises(n, m);
         const contours = this.getContours(noises);
         const tiles = this.extractTiles(noises);
-        const biomes = this.extractBiomes(noises);
+        const biomes = this.extractBiomes(n, m, noises);
         const items = this.generateItems(tiles, n, m);
 
         return new Chunk(n, m, chunkSize, tileSize, biomes, contours, items);

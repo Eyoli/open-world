@@ -10,6 +10,7 @@ export type WorldConfig = {
 
 export type FactorConfig = {
     density: number
+    octaves?: number
     pThresholds: number[]
 }
 

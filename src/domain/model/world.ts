@@ -90,12 +90,15 @@ export class World {
         return this.chunksHolder.getVisibleChunks(this.center, this.loadingDistance);
     }
 
+    getBiomeAt(position: Position) {
+        const chunk = this.chunksHolder.getChunk(position);
+        return chunk.getBiome(position);
+    }
+
     private generatePokemonAt(position: Position) {
-        const {chunksHolder, pokedex} = this
+        const {pokedex} = this
 
-        const chunk = chunksHolder.getChunk(position);
-
-        const biome = chunk.getBiome(position);
+        const biome = this.getBiomeAt(position);
         if (!biome) return null;
 
         const pokemonData = pokedex.generateRandomPokemon(biome.config);

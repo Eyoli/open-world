@@ -23,7 +23,7 @@ export const config: WorldConfig = {
     ],
     biomes: {
         BEACH: {
-            type: "BEACH",
+            type: "Beach",
             color: "#d5c8af",
             pItem: 0.005,
             pokemons: [],
@@ -43,7 +43,7 @@ export const config: WorldConfig = {
             items: []
         },
         DEEP_OCEAN: {
-            type: "DEEP_OCEAN",
+            type: "Deep ocean",
             color: "#093970",
             pItem: 0,
             pokemons: [
@@ -67,7 +67,7 @@ export const config: WorldConfig = {
             items: []
         },
         OCEAN: {
-            type: "OCEAN",
+            type: "Ocean",
             color: "#2469b8",
             pItem: 0,
             pokemons: [
@@ -107,7 +107,7 @@ export const config: WorldConfig = {
             items: []
         },
         PLAIN: {
-            type: "PLAIN",
+            type: "Plain",
             color: "#63a131",
             pItem: 0.01,
             pokemons: [
@@ -143,7 +143,7 @@ export const config: WorldConfig = {
             ]
         },
         FOREST: {
-            type: "FOREST",
+            type: "Forest",
             color: "#3e6c15",
             pItem: 0.25,
             pokemons: [
@@ -230,7 +230,7 @@ export const config: WorldConfig = {
             ]
         },
         MOUNTAIN: {
-            type: "MOUNTAIN",
+            type: "Mountain",
             color: "#535047",
             pItem: 0.04,
             items: [
@@ -332,37 +332,27 @@ export const config: WorldConfig = {
             ]
         },
         GLACIER: {
-            type: "GLACIER",
+            type: "Glacier",
             color: "#96dadd",
             pItem: 0,
-            pokemons: [
-                {
-                    ids: [216, 220],
-                    w: 4
-                },
-                {
-                    ids: [124, 215, 225, 238, 361],
-                    w: 3
-                },
-                {
-                    ids: [217, 221],
-                    w: 1
-                }
-            ],
+            pokemons: [],
             items: []
         }
     },
     factors: {
         HEIGHT: {
             density: 500,
-            pThresholds: [0.45, 0.55, 0.58, 0.63, 0.9, 0.97, 1]
+            octaves: 3,
+            pThresholds: [0.45, 0.53, 0.58, 0.63, 0.9, 0.97, 1]
         },
         NATURE: {
             density: 40,
+            octaves: 3,
             pThresholds: [0.7, 1]
         },
         HUMIDITY: {
             density: 40,
+            octaves: 1,
             pThresholds: [0.9, 1]
         }
     },

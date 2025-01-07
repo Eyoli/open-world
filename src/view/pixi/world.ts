@@ -6,6 +6,7 @@ import {Viewport} from "pixi-viewport";
 import {createPokemonSprite, PokemonSprite} from "./pokemon";
 import {Pokemon} from "../../domain/model/pokemon";
 import {Chunk} from "../../domain/model/chunk";
+import {UserInterface} from "./ui";
 
 export class WorldContainer {
     private readonly container: Container<ContainerChild>;
@@ -15,6 +16,7 @@ export class WorldContainer {
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
     private visibleChunks: Chunk[] = [];
+    private ui: UserInterface;
 
     constructor(
         private readonly app: Application,
@@ -35,9 +37,14 @@ export class WorldContainer {
         //this.container.addChild(this.collisionLayer);
 
         this.viewport = createAdminViewport(app, width, height);
+
         app.stage.addChild(this.viewport);
         this.viewport.addChild(this.container);
         this.viewport.moveCenter(this.world.center.x, this.world.center.y);
+
+        this.ui = new UserInterface();
+        this.ui.position.set(10, 10);
+        app.stage.addChild(this.ui);
     }
 
     render = () => {
@@ -47,7 +54,10 @@ export class WorldContainer {
 
         this.viewport.on('pointerdown', (event) => {
             world.center = this.viewport.toWorld({x: event.x, y: event.y});
-            this.renderChunks()
+            this.renderChunks();
+
+            const biome = world.getBiomeAt(world.center);
+            this.ui.updateCurrentBiome(biome.config.type);
         });
     }
 
@@ -87,38 +97,22 @@ export class WorldContainer {
     }
 
     private renderChunkBackground(chunk: Chunk) {
-        const chunkSize = chunk.size * chunk.tileSize;
-        const offsetX = chunk.n * chunkSize;
-        const offsetY = chunk.m * chunkSize;
-
         for (const biome of chunk.biomes) {
             const graphics = new Graphics();
 
-            const drawablePolygon = biome.polygon.map(([y, x]) => ({
-                x: offsetX + x * chunk.tileSize,
-                y: offsetY + y * chunk.tileSize
-            } as PointData));
+            const drawablePolygon = biome.polygon.map(([y, x]) => ({x, y} as PointData));
             graphics.poly(drawablePolygon);
             graphics.fill(biome.config.color);
             this.backgroundLayer.addChild(graphics);
         }
     }
 
-    private renderChunkCoutours(chunk: Chunk) {
-        const chunkSize = chunk.size * chunk.tileSize;
-        const offsetX = chunk.n * chunkSize;
-        const offsetY = chunk.m * chunkSize;
-
+    private renderChunkContours(chunk: Chunk) {
         for (const polygons of Object.values(chunk.contours)) {
             const graphics = new Graphics();
             for (const polygon of polygons) {
-                const xxx = polygon.map(([y, x], i) => {
-                    return ({
-                        x: offsetX + x * chunk.tileSize,
-                        y: offsetY + y * chunk.tileSize
-                    } as PointData);
-                });
-                graphics.poly(xxx);
+                const points = polygon.map(([y, x], i) => ({x, y} as PointData));
+                graphics.poly(points);
                 graphics.stroke({color: "red", width: 5});
             }
             this.backgroundLayer.addChild(graphics);
@@ -153,7 +147,7 @@ export class WorldContainer {
                 }
 
                 this.renderChunkBackground(chunk);
-                this.renderChunkCoutours(chunk);
+                // this.renderChunkContours(chunk);
 
                 for (const pokemonSprite of this.pokemons.values()) {
                     this.itemLayer.addChild(pokemonSprite);
