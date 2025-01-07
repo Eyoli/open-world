@@ -7,6 +7,7 @@ import {createPokemonSprite, PokemonSprite} from "./pokemon";
 import {Pokemon} from "../../domain/model/pokemon";
 import {Chunk} from "../../domain/model/chunk";
 import {UserInterface} from "./ui";
+import {BiomeView} from "./biome";
 
 export class WorldContainer {
     private readonly container: Container<ContainerChild>;
@@ -96,18 +97,10 @@ export class WorldContainer {
         this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
     }
 
-    private renderChunkBackground(chunk: Chunk) {
+    private renderBiomes(chunk: Chunk) {
         for (const biome of chunk.biomes) {
-            const graphics = new Graphics();
-
-            const drawablePolygon = biome.polygon.map(([y, x]) => ({x, y} as PointData));
-            graphics.poly(drawablePolygon);
-            if (biome.config.texture) {
-                graphics.fill({texture: Texture.from(biome.config.texture), color: biome.config.color});
-            } else {
-                graphics.fill({color: biome.config.color});
-            }
-            this.backgroundLayer.addChild(graphics);
+            const view = new BiomeView(biome);
+            this.backgroundLayer.addChild(view);
         }
     }
 
@@ -150,7 +143,7 @@ export class WorldContainer {
                     this.itemLayer.addChild(itemView);
                 }
 
-                this.renderChunkBackground(chunk);
+                this.renderBiomes(chunk);
                 // this.renderChunkContours(chunk);
 
                 for (const pokemonSprite of this.pokemons.values()) {
@@ -165,7 +158,7 @@ export class WorldContainer {
 
 const createItemView = (item: Item, world: World) => new Sprite({
     texture: Texture.from(item.type),
-    x: item.position[0] * world.config.tileSize,
-    y: item.position[1] * world.config.tileSize,
+    x: (item.position[0] - 0.5) * world.tileSize,
+    y: (item.position[1] - 0.5) * world.tileSize,
     scale: item.scale
 });

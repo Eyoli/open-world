@@ -5,8 +5,8 @@ export const config: WorldConfig = {
         maxNumber: 50,
         maxDistanceToCenter: 2000
     },
-    chunkSize: 20,
-    tileSize: 50,
+    chunkSize: 1000,
+    chunkDensity: 40,
     assets: [
         {
             alias: "UNKNOWN",
@@ -161,7 +161,7 @@ export const config: WorldConfig = {
         FOREST: {
             type: "Forest",
             color: "#3e6c15",
-            pItem: 0.25,
+            pItem: 0.1,
             pokemons: [
                 {
                     ids: [10, 13, 43, 46],
@@ -206,8 +206,8 @@ export const config: WorldConfig = {
         },
         HIGH_FOREST: {
             type: "High forest",
+            preset: "FOREST",
             color: "#535047",
-            pItem: 0.25,
             pokemons: [
                 {
                     ids: [10, 13, 43, 46],
@@ -318,8 +318,8 @@ export const config: WorldConfig = {
         },
         SNOWY_FOREST: {
             type: "Snowy forest",
+            preset: "FOREST",
             color: "#d1f2f4",
-            pItem: 0.25,
             pokemons: [
                 {
                     ids: [216, 220],
@@ -357,9 +357,9 @@ export const config: WorldConfig = {
     },
     factors: {
         HEIGHT: {
-            density: 500,
+            density: 800,
             octaves: 3,
-            pThresholds: [0.45, 0.53, 0.58, 0.63, 0.9, 0.97, 1]
+            pThresholds: [0.40, 0.53, 0.58, 0.63, 0.9, 0.97, 1]
         },
         NATURE: {
             density: 40,

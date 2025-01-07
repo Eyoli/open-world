@@ -8,6 +8,7 @@ import {quadtree, Quadtree, QuadtreeLeaf} from "d3-quadtree";
 
 export class World {
     private readonly chunksHolder: ChunksHolder;
+    readonly tileSize: number;
     private readonly pokemons: Pokemon[] = [];
     pokemonTree: Quadtree<{ x: number, y: number, data: Pokemon }> = quadtree()
     center: Position = {x: 0, y: 0};
@@ -18,6 +19,7 @@ export class World {
         private readonly pokedex: Pokedex
     ) {
         this.chunksHolder = new ChunksHolder(config);
+        this.tileSize = config.chunkSize / config.chunkDensity;
     }
 
     seeAround(pokemon: Pokemon, radius: number) {

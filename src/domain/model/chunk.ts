@@ -1,4 +1,4 @@
-import {BiomeConfig, TerrainConfig, WorldConfig} from "./config";
+import {BiomeConfig, FactorConfig, TerrainConfig, WorldConfig} from "./config";
 import {Item} from "./item";
 import {FBMGenerator} from "../utils/perlin";
 import {randomUniform} from "../utils/random";
@@ -8,21 +8,13 @@ import {Map2D} from "../utils/collections";
 import {isoBands} from "marchingsquares";
 import {applyMask, combineMasks, createMask} from "./matrix";
 import {polygonArea, polygonContains} from "d3-polygon";
-
-export class Biome {
-    constructor(
-        readonly polygon: [number, number][],
-        readonly config: BiomeConfig
-    ) {
-    }
-}
+import {Biome} from "./biome";
 
 export class Chunk {
     constructor(
         readonly n: number,
         readonly m: number,
         readonly size: number,
-        readonly tileSize: number,
         readonly biomes: Biome[],
         readonly contours: { [p: string]: Polygon[] },
         readonly items: Item[],
@@ -44,39 +36,51 @@ export class ChunksHolder {
     private readonly randomizer = randomUniform();
     private readonly normalDistribution = Normal(0, 0.22);
 
-    constructor(
-        private readonly config: WorldConfig
-    ) {
-        for (let factor in this.config.factors) {
-            const {density, octaves} = this.config.factors[factor];
+    private readonly biomes: { [p: string]: BiomeConfig } = {};
+    private readonly factors: { [p: string]: FactorConfig }
+    private readonly terrain: TerrainConfig
+    private readonly chunkSize: number
+    private readonly tilesNumber: number
+
+    constructor(config: WorldConfig) {
+        for (const [key, biome] of Object.entries(config.biomes)) {
+            this.biomes[key] = {...config.biomes[biome.preset], ...biome};
+        }
+        this.factors = config.factors;
+        this.terrain = config.terrain;
+        this.chunkSize = config.chunkSize
+        this.tilesNumber = config.chunkDensity
+
+        for (let factor in this.factors) {
+            const {density, octaves} = this.factors[factor];
             this.generators.set(factor, new FBMGenerator(density, octaves || 2));
         }
     }
 
     private getNoises(n: number, m: number): { [key: string]: number[][] } {
-        const {config: {chunkSize}} = this;
+        const {tilesNumber} = this;
         const noises: { [key: string]: number[][] } = {}
         for (let [key, g] of this.generators) {
-            noises[key] = g.getNoiseField(n * chunkSize, m * chunkSize, (chunkSize + 1), (chunkSize + 1)).noises
+            noises[key] = g.getNoiseField(n * tilesNumber, m * tilesNumber, (tilesNumber + 1), (tilesNumber + 1)).noises
         }
         return noises;
     }
 
     private extractTiles(noises: { [key: string]: number[][] }): BiomeConfig[][] {
-        const {config, normalDistribution} = this;
+        const {tilesNumber, normalDistribution} = this;
 
         const tiles: BiomeConfig[][] = [];
-        for (let x = 0; x < config.chunkSize; x++) {
+        for (let x = 0; x < tilesNumber; x++) {
             const line = [];
-            for (let y = 0; y < config.chunkSize; y++) {
-                let terrain = config.terrain;
+            for (let y = 0; y < tilesNumber; y++) {
+                let terrain = this.terrain;
                 while (terrain.sub) {
                     const noise = noises[terrain.factor][x][y];
-                    const factor = config.factors[terrain.factor];
+                    const factor = this.factors[terrain.factor];
                     const index = factor.pThresholds.findIndex(threshold => noise < normalDistribution.inv(threshold));
                     terrain = terrain.sub[index];
                 }
-                line.push(config.biomes[terrain.type]);
+                line.push(this.biomes[terrain.type]);
             }
             tiles.push(line);
         }
@@ -84,11 +88,9 @@ export class ChunksHolder {
     }
 
     private extractBiomes(n: number, m: number, noises: { [key: string]: number[][] }): Biome[] {
-        const {config: {biomes, factors, terrain, chunkSize, tileSize}, normalDistribution} = this;
-        const offset = [
-            n * chunkSize * tileSize,
-            m * chunkSize * tileSize
-        ];
+        const {biomes, factors, terrain, chunkSize, tilesNumber, normalDistribution} = this;
+        const offset = [n * chunkSize, m * chunkSize];
+        const tileSize = chunkSize / tilesNumber;
 
         const newBiomes: Biome[] = [];
         const candidates: {
@@ -130,7 +132,7 @@ export class ChunksHolder {
     }
 
     private generateItems(tiles: BiomeConfig[][], n: number, m: number) {
-        const {config: {chunkSize}, randomizer} = this;
+        const {tilesNumber, randomizer} = this;
         return tiles
             .flatMap((line, x) => line
                 .map((biome, y) => {
@@ -148,13 +150,17 @@ export class ChunksHolder {
                     };
                 })
                 .filter((item) => item)
-                .map(({x, y, item}) => new Item([n * chunkSize + x, m * chunkSize + y], item.type, item.scale || 1)));
+                .map(({
+                          x,
+                          y,
+                          item
+                      }) => new Item([n * tilesNumber + x, m * tilesNumber + y], item.type, item.scale || 1)));
     }
 
     private getChunkPosition(position: Position) {
         return {
-            n: Math.floor(position.x / (this.config.chunkSize * this.config.tileSize)),
-            m: Math.floor(position.y / (this.config.chunkSize * this.config.tileSize))
+            n: Math.floor(position.x / this.chunkSize),
+            m: Math.floor(position.y / this.chunkSize)
         }
     }
 
@@ -177,7 +183,7 @@ export class ChunksHolder {
         const contours: { [p: string]: Polygon[] } = {};
 
         for (const [key, noise] of Object.entries(noises)) {
-            const factor = this.config.factors[key];
+            const factor = this.factors[key];
             const lowerBound = factor.pThresholds.map(threshold => this.normalDistribution.inv(threshold));
             lowerBound.pop();
             lowerBound.unshift(-1);
@@ -200,7 +206,7 @@ export class ChunksHolder {
     }
 
     private generate(n: number, m: number) {
-        const {config: {chunkSize, tileSize}} = this;
+        const {tilesNumber} = this;
 
         const noises = this.getNoises(n, m);
         const contours = this.getContours(noises);
@@ -208,6 +214,6 @@ export class ChunksHolder {
         const biomes = this.extractBiomes(n, m, noises);
         const items = this.generateItems(tiles, n, m);
 
-        return new Chunk(n, m, chunkSize, tileSize, biomes, contours, items);
+        return new Chunk(n, m, tilesNumber, biomes, contours, items);
     }
 }
