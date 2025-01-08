@@ -140,6 +140,7 @@ export class WorldContainer {
             for (const chunk of updateVisibleChunks) {
                 for (const item of chunk.items) {
                     const itemView = createItemView(item, world);
+                    itemView.anchor.set(0.5, 1);
                     this.itemLayer.addChild(itemView);
                 }
 
@@ -158,7 +159,7 @@ export class WorldContainer {
 
 const createItemView = (item: Item, world: World) => new Sprite({
     texture: Texture.from(item.type),
-    x: (item.position[0] - 0.5) * world.tileSize,
-    y: (item.position[1] - 0.5) * world.tileSize,
+    x: (item.position[0] + 0.5) * world.tileSize,
+    y: (item.position[1] + 0.5) * world.tileSize,
     scale: item.scale
 });

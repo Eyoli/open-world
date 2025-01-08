@@ -31,6 +31,22 @@ export const config: WorldConfig = {
         {
             alias: "sand",
             src: "dist/images/sand.png"
+        },
+        {
+            alias: "snow",
+            src: "dist/images/snow.png"
+        },
+        {
+            alias: "mountain",
+            src: "dist/images/mountain.png"
+        },
+        {
+            alias: "water",
+            src: "dist/images/water.png"
+        },
+        {
+            alias: "grass",
+            src: "dist/images/grass.png"
         }
     ],
     biomes: {
@@ -58,7 +74,7 @@ export const config: WorldConfig = {
         DEEP_OCEAN: {
             type: "Deep ocean",
             color: "#3374bf",
-            texture: "deep_water",
+            texture: "water",
             pItem: 0,
             pokemons: [
                 {
@@ -83,7 +99,7 @@ export const config: WorldConfig = {
         OCEAN: {
             type: "Ocean",
             color: "#5a9ae3",
-            texture: "deep_water",
+            texture: "water",
             pItem: 0,
             pokemons: [
                 {
@@ -103,8 +119,8 @@ export const config: WorldConfig = {
         },
         LAKE: {
             type: "Lake",
-            color: "#ffffff",
-            texture: "deep_water",
+            color: "#adc9cd",
+            texture: "water",
             pItem: 0,
             pokemons: [
                 {
@@ -125,6 +141,7 @@ export const config: WorldConfig = {
         PLAIN: {
             type: "Plain",
             color: "#63a131",
+            texture: "grass",
             pItem: 0.01,
             pokemons: [
                 {
@@ -161,6 +178,7 @@ export const config: WorldConfig = {
         FOREST: {
             type: "Forest",
             color: "#3e6c15",
+            texture: "grass",
             pItem: 0.1,
             pokemons: [
                 {
@@ -204,10 +222,53 @@ export const config: WorldConfig = {
                 }
             ]
         },
+        RED_FOREST: {
+            type: "Red forest",
+            preset: "FOREST",
+            color: "#d68da8",
+            texture: "grass",
+            pokemons: [
+                {
+                    ids: [10, 13, 43, 46],
+                    w: 4
+                },
+                {
+                    ids: [11, 14, 44, 47],
+                    w: 2
+                },
+                {
+                    ids: [12, 15, 45],
+                    w: 1
+                },
+            ],
+            items: [
+                {
+                    type: "6DF63721-51D4-4805-9718-B98797894384",
+                    w: 2,
+                    scale: 2
+                },
+                {
+                    type: "5542D68E-3599-4A8B-8C8D-3FD0F03F79255",
+                    w: 2,
+                    scale: 2
+                },
+                {
+                    type: "C0D8AFAE-9108-4F0F-8601-580B357C3877",
+                    w: 2,
+                    scale: 2
+                },
+                {
+                    type: "51016691-C994-424D-90EE-41704B06C543",
+                    w: 1,
+                    scale: 2
+                }
+            ]
+        },
         HIGH_FOREST: {
             type: "High forest",
             preset: "FOREST",
-            color: "#535047",
+            color: "#b5b3a5",
+            texture: "mountain",
             pokemons: [
                 {
                     ids: [10, 13, 43, 46],
@@ -247,7 +308,8 @@ export const config: WorldConfig = {
         },
         MOUNTAIN: {
             type: "Mountain",
-            color: "#535047",
+            color: "#b5b3a5",
+            texture: "mountain",
             pItem: 0.04,
             items: [
                 {
@@ -288,6 +350,7 @@ export const config: WorldConfig = {
         SNOWY_MOUNTAIN: {
             type: "Snowy mountain",
             color: "#d1f2f4",
+            texture: "snow",
             pItem: 0.005,
             pokemons: [
                 {
@@ -320,6 +383,7 @@ export const config: WorldConfig = {
             type: "Snowy forest",
             preset: "FOREST",
             color: "#d1f2f4",
+            texture: "snow",
             pokemons: [
                 {
                     ids: [216, 220],
@@ -349,7 +413,7 @@ export const config: WorldConfig = {
         },
         GLACIER: {
             type: "Glacier",
-            color: "#96dadd",
+            color: "#b3ebed",
             pItem: 0,
             pokemons: [],
             items: []
