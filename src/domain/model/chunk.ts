@@ -6,7 +6,7 @@ import {Normal} from "distributions";
 import {Polygon, Position} from "./types";
 import {Map2D} from "../utils/collections";
 import {isoBands} from "marchingsquares";
-import {applyMask, combineMasks, createMask} from "./matrix";
+import {combineMasks, createMask} from "../utils/masks";
 import {polygonArea, polygonContains} from "d3-polygon";
 import {Biome} from "./biome";
 
@@ -16,7 +16,6 @@ export class Chunk {
         readonly m: number,
         readonly size: number,
         readonly biomes: Biome[],
-        readonly contours: { [p: string]: Polygon[] },
         readonly items: Item[],
     ) {
     }
@@ -76,8 +75,7 @@ export class ChunksHolder {
                 let terrain = this.terrain;
                 while (terrain.sub) {
                     const noise = noises[terrain.factor][x][y];
-                    const factor = this.factors[terrain.factor];
-                    const index = factor.pThresholds.findIndex(threshold => noise < normalDistribution.inv(threshold));
+                    const index = terrain.sub.findIndex(sub => noise < normalDistribution.inv(sub.threshold));
                     terrain = terrain.sub[index];
                 }
                 line.push(this.biomes[terrain.type]);
@@ -88,7 +86,7 @@ export class ChunksHolder {
     }
 
     private extractBiomes(n: number, m: number, noises: { [key: string]: number[][] }): Biome[] {
-        const {biomes, factors, terrain, chunkSize, tilesNumber, normalDistribution} = this;
+        const {biomes, terrain, chunkSize, tilesNumber, normalDistribution} = this;
         const offset = [n * chunkSize, m * chunkSize];
         const tileSize = chunkSize / tilesNumber;
 
@@ -103,12 +101,12 @@ export class ChunksHolder {
             mask: null
         }];
         while (candidates.length > 0) {
-            const {node, factorNoises, mask} = candidates.pop();
+            const {node, mask} = candidates.pop();
             if (node.sub) {
                 let lowerBound = -1;
                 for (let i = 0; i < node.sub.length; i++) {
                     const sub = node.sub[i];
-                    const upperBound = normalDistribution.inv(factors[node.factor].pThresholds[i]);
+                    const upperBound = normalDistribution.inv(sub.threshold);
                     const subMask = createMask(noises[node.factor], [lowerBound, upperBound]);
                     candidates.push({
                         node: sub,
@@ -118,7 +116,7 @@ export class ChunksHolder {
                     lowerBound = upperBound;
                 }
             } else {
-                const polygons = isoBands(applyMask(factorNoises, mask), [-1], [2])[0];
+                const polygons = isoBands(mask, [1E-32], [100])[0];
                 if (polygons.length > 0) {
                     newBiomes.push(...polygons.map((polygon: Polygon) => {
                         const translatedPolygon: Polygon = polygon.map(([y, x]) => [offset[1] + y * tileSize, offset[0] + x * tileSize]);
@@ -179,27 +177,6 @@ export class ChunksHolder {
         return this.getChunkAt(n, m);
     }
 
-    private getContours(noises: { [key: string]: number[][] }): { [p: string]: Polygon[] } {
-        const contours: { [p: string]: Polygon[] } = {};
-
-        for (const [key, noise] of Object.entries(noises)) {
-            const factor = this.factors[key];
-            const lowerBound = factor.pThresholds.map(threshold => this.normalDistribution.inv(threshold));
-            lowerBound.pop();
-            lowerBound.unshift(-1);
-            const bandWidth = lowerBound.reduce((acc, threshold, i) => {
-                if (i > 0) {
-                    acc.push(threshold - lowerBound[i - 1]);
-                }
-                return acc;
-            }, []);
-            bandWidth.push(2);
-            contours[key] = isoBands(noise, lowerBound, bandWidth).flatMap((polygons: Polygon[]) => polygons);
-        }
-
-        return contours;
-    }
-
     private getChunkAt(n: number, m: number) {
         const {chunks} = this;
         return chunks.getOrLoad(n, m, () => this.generate(n, m));
@@ -209,11 +186,10 @@ export class ChunksHolder {
         const {tilesNumber} = this;
 
         const noises = this.getNoises(n, m);
-        const contours = this.getContours(noises);
         const tiles = this.extractTiles(noises);
         const biomes = this.extractBiomes(n, m, noises);
         const items = this.generateItems(tiles, n, m);
 
-        return new Chunk(n, m, tilesNumber, biomes, contours, items);
+        return new Chunk(n, m, tilesNumber, biomes, items);
     }
 }

@@ -1,9 +1,9 @@
 import {Pokemon} from "../../domain/model/pokemon";
-import {AnimatedSprite, Container, Graphics, Texture} from "pixi.js";
+import {AnimatedSprite, Graphics, Sprite, Texture} from "pixi.js";
 import {Direction} from "../../domain/model/types";
 import {loadTextures} from "./common/texture";
 
-export class PokemonSprite extends Container {
+export class PokemonSprite extends Sprite {
     private readonly hpBar: Graphics;
 
     constructor(

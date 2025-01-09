@@ -1,5 +1,3 @@
-// Generate suite test for perlin noise
-
 import {FBMGenerator} from "./perlin";
 
 jest.mock('d3-random', () => {

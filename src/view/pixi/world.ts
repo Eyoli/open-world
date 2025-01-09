@@ -1,4 +1,4 @@
-import {Application, Container, ContainerChild, Graphics, PointData, Sprite, Texture} from "pixi.js";
+import {Application, Container, ContainerChild, Graphics, Mesh, Sprite, Texture} from "pixi.js";
 import {Item} from "../../domain/model/item";
 import {World} from "../../domain/model/world";
 import {createAdminViewport} from "./controls";
@@ -12,7 +12,7 @@ import {BiomeView} from "./biome";
 export class WorldContainer {
     private readonly container: Container<ContainerChild>;
     private readonly backgroundLayer: Container<ContainerChild>;
-    private readonly itemLayer: Container<ContainerChild>;
+    private readonly itemLayer: Container<Sprite>;
     private readonly collisionLayer: Graphics = new Graphics();
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
@@ -94,25 +94,13 @@ export class WorldContainer {
                 this.collisionLayer.stroke({color: 0xff0000, width: 5});
             }
         });
-        this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
+        sortItems(this.itemLayer.children);
     }
 
     private renderBiomes(chunk: Chunk) {
         for (const biome of chunk.biomes) {
             const view = new BiomeView(biome);
             this.backgroundLayer.addChild(view);
-        }
-    }
-
-    private renderChunkContours(chunk: Chunk) {
-        for (const polygons of Object.values(chunk.contours)) {
-            const graphics = new Graphics();
-            for (const polygon of polygons) {
-                const points = polygon.map(([y, x], i) => ({x, y} as PointData));
-                graphics.poly(points);
-                graphics.stroke({color: "red", width: 5});
-            }
-            this.backgroundLayer.addChild(graphics);
         }
     }
 
@@ -131,7 +119,7 @@ export class WorldContainer {
     private renderChunks() {
         const {world} = this;
 
-        const updateVisibleChunks = Array.from(world.getVisibleChunks());
+        const updateVisibleChunks: Chunk[] = Array.from(world.getVisibleChunks());
         const ids = updateVisibleChunks.map(c => c.id());
         if (this.visibleChunks.length == 0 || this.visibleChunks.some(c => !ids.includes(c.id()))) {
             this.clearChunks();
@@ -145,17 +133,18 @@ export class WorldContainer {
                 }
 
                 this.renderBiomes(chunk);
-                // this.renderChunkContours(chunk);
 
                 for (const pokemonSprite of this.pokemons.values()) {
                     this.itemLayer.addChild(pokemonSprite);
                 }
             }
-            this.itemLayer.children.sort((a, b) => (a.position.y + a.height) - (b.position.y + b.height));
+            sortItems(this.itemLayer.children);
             this.visibleChunks = updateVisibleChunks;
         }
     }
 }
+
+const sortItems = (items: Sprite[]) => items.sort((a, b) => ((a.position.y + a.height * a.anchor.y) - (b.position.y + b.height * b.anchor.y)));
 
 const createItemView = (item: Item, world: World) => new Sprite({
     texture: Texture.from(item.type),

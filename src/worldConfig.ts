@@ -21,6 +21,10 @@ export const config: WorldConfig = {
             src: "dist/images/trees.json"
         },
         {
+            alias: "ROCKS",
+            src: "dist/images/rocks.json"
+        },
+        {
             alias: "BUILDINGS",
             src: "dist/images/buildings.json"
         },
@@ -54,11 +58,16 @@ export const config: WorldConfig = {
             type: "Beach",
             color: "#e1d8c6",
             texture: "sand",
-            pItem: 0.005,
+            pItem: 0.002,
             pokemons: [],
             items: [
                 {
                     type: "BBCA3668-37E6-4401-8F86-F91792DC4CD3",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "5FC6E016-2AB4-4891-8082-AA9B54DB6CDD",
                     w: 1,
                     scale: 2
                 }
@@ -66,10 +75,32 @@ export const config: WorldConfig = {
         },
         DESERT: {
             type: "Desert",
-            color: "#d5c8af",
-            pItem: 0,
+            color: "#c6b799",
+            texture: "sand",
+            pItem: 0.004,
             pokemons: [],
-            items: []
+            items: [
+                {
+                    type: "51A643D4-6973-4269-A6D3-796F94011275",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "DE7AB9F7-B21F-4FD4-BDC9-C9D55DD0BE04",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "7E32CBA5-EBF3-424A-A839-EBA44E46486E",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "65C40BB9-5DE4-4694-9E90-3B4C6113583E",
+                    w: 1,
+                    scale: 2
+                }
+            ]
         },
         DEEP_OCEAN: {
             type: "Deep ocean",
@@ -100,7 +131,7 @@ export const config: WorldConfig = {
             type: "Ocean",
             color: "#5a9ae3",
             texture: "water",
-            pItem: 0,
+            pItem: 0.0005,
             pokemons: [
                 {
                     ids: [72, 90],
@@ -115,11 +146,38 @@ export const config: WorldConfig = {
                     w: 2
                 }
             ],
-            items: []
+            items: [
+                {
+                    type: "72C3A99D-BD99-48F8-8ACB-BCFC3942F0B4",
+                    w: 1,
+                    scale: 2
+                }
+            ]
         },
         LAKE: {
             type: "Lake",
             color: "#adc9cd",
+            texture: "water",
+            pItem: 0,
+            pokemons: [
+                {
+                    ids: [7, 60],
+                    w: 4
+                },
+                {
+                    ids: [8, 61],
+                    w: 2
+                },
+                {
+                    ids: [9, 62],
+                    w: 1
+                }
+            ],
+            items: []
+        },
+        OASIS: {
+            type: "Oasis",
+            color: "#d2dfe1",
             texture: "water",
             pItem: 0,
             pokemons: [
@@ -177,7 +235,7 @@ export const config: WorldConfig = {
         },
         FOREST: {
             type: "Forest",
-            color: "#3e6c15",
+            color: "#558e27",
             texture: "grass",
             pItem: 0.1,
             pokemons: [
@@ -224,9 +282,9 @@ export const config: WorldConfig = {
         },
         RED_FOREST: {
             type: "Red forest",
-            preset: "FOREST",
-            color: "#d68da8",
-            texture: "grass",
+            pItem: 0.05,
+            color: "#c6b799",
+            texture: "sand",
             pokemons: [
                 {
                     ids: [10, 13, 43, 46],
@@ -244,22 +302,22 @@ export const config: WorldConfig = {
             items: [
                 {
                     type: "6DF63721-51D4-4805-9718-B98797894384",
-                    w: 2,
+                    w: 3,
                     scale: 2
                 },
                 {
-                    type: "5542D68E-3599-4A8B-8C8D-3FD0F03F79255",
-                    w: 2,
+                    type: "5542D68E-3599-4A8B-8C8D-3FD0F03F7925",
+                    w: 3,
                     scale: 2
                 },
                 {
                     type: "C0D8AFAE-9108-4F0F-8601-580B357C3877",
-                    w: 2,
+                    w: 1,
                     scale: 2
                 },
                 {
-                    type: "51016691-C994-424D-90EE-41704B06C543",
-                    w: 1,
+                    type: "4DCFED99-036F-4A27-8D90-B00908595F6C",
+                    w: 2,
                     scale: 2
                 }
             ]
@@ -324,6 +382,16 @@ export const config: WorldConfig = {
                 },
                 {
                     type: "C34B7581-3176-4E5E-A7BF-8A90927DC70C",
+                    w: 2,
+                    scale: 2
+                },
+                {
+                    type: "61366C93-253D-47CC-B1FB-FDC4AA51DA8C",
+                    w: 1,
+                    scale: 2
+                },
+                {
+                    type: "A4333FCB-C4F9-4340-AEBE-EAD3B1DF72C3",
                     w: 2,
                     scale: 2
                 }
@@ -423,87 +491,151 @@ export const config: WorldConfig = {
         HEIGHT: {
             density: 800,
             octaves: 3,
-            pThresholds: [0.40, 0.53, 0.58, 0.63, 0.9, 0.97, 1]
         },
         NATURE: {
             density: 40,
             octaves: 3,
-            pThresholds: [0.7, 1]
+        },
+        CLIMATE: {
+            density: 1000,
+            octaves: 1,
         },
         HUMIDITY: {
             density: 40,
             octaves: 1,
-            pThresholds: [0.9, 1]
         }
     },
     terrain: {
         factor: "HEIGHT",
         sub: [
             {
+                threshold: 0.4,
                 type: "DEEP_OCEAN",
             },
             {
+                threshold: 0.53,
                 type: "OCEAN",
             },
             {
-                type: "BEACH"
+                threshold: 0.58,
+                type: "BEACH",
             },
             {
-                type: "PLAIN"
-            },
-            {
-                factor: "HUMIDITY",
+                threshold: 0.63,
+                factor: "CLIMATE",
                 sub: [
                     {
-                        factor: "NATURE",
+                        threshold: 0.5,
+                        type: "PLAIN"
+                    },
+                    {
+                        threshold: 1,
+                        type: "DESERT"
+                    }
+                ]
+            },
+            {
+                threshold: 0.9,
+                factor: "CLIMATE",
+                sub: [
+                    {
+                        threshold: 0.5,
+                        factor: "HUMIDITY",
                         sub: [
                             {
-                                type: "PLAIN",
+                                threshold: 0.95,
+                                factor: "NATURE",
+                                sub: [
+                                    {
+                                        threshold: 0.7,
+                                        type: "FOREST",
+                                    },
+                                    {
+                                        threshold: 1,
+                                        type: "PLAIN",
+                                    },
+                                ]
                             },
                             {
-                                type: "FOREST",
-                            }
+                                threshold: 1,
+                                type: "LAKE",
+                            },
                         ]
                     },
                     {
-                        type: "LAKE",
+                        threshold: 1,
+                        factor: "HUMIDITY",
+                        sub: [
+                            {
+                                threshold: 0.9,
+                                factor: "NATURE",
+                                sub: [
+                                    {
+                                        threshold: 0.3,
+                                        type: "RED_FOREST",
+                                    },
+                                    {
+                                        threshold: 1,
+                                        type: "DESERT",
+                                    },
+                                ]
+                            },
+                            {
+                                threshold: 0.96,
+                                type: "BEACH",
+                            },
+                            {
+                                threshold: 1,
+                                type: "OASIS",
+                            },
+                        ]
                     },
                 ]
             },
             {
+                threshold: 0.97,
                 factor: "HUMIDITY",
                 sub: [
                     {
+                        threshold: 0.9,
                         factor: "NATURE",
                         sub: [
                             {
+                                threshold: 0.7,
                                 type: "MOUNTAIN",
                             },
                             {
+                                threshold: 1,
                                 type: "HIGH_FOREST",
                             }
                         ]
                     },
                     {
+                        threshold: 1,
                         type: "LAKE",
                     }
                 ],
             },
             {
+                threshold: 1,
                 factor: "HUMIDITY",
                 sub: [
                     {
+                        threshold: 0.9,
                         factor: "NATURE",
                         sub: [
                             {
+                                threshold: 0.7,
                                 type: "SNOWY_MOUNTAIN",
                             },
                             {
+                                threshold: 1,
                                 type: "SNOWY_FOREST",
                             }
                         ]
                     },
                     {
+                        threshold: 1,
                         type: "GLACIER",
                     }
                 ],

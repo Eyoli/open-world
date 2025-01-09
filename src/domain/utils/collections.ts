@@ -34,7 +34,6 @@ export class Map2D<T> {
     getOrLoad = (x: number, y: number, defaultValue: () => T): T => {
         const key = `${x},${y}`;
         if (!this.map.has(key)) {
-            console.log("Loading", key);
             this.map.set(key, defaultValue());
         }
         return this.map.get(key);

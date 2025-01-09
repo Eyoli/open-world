@@ -42,26 +42,30 @@ export const applyMask = (a: number[][], mask: boolean[][]): number[][] => {
     return result;
 }
 
-export const amplifyInterval = (a: number[][], thresholds: [number, number]): number[][] => {
+export const createQuasiMask = (a: number[][], thresholds: [number, number]): number[][] => {
     const result: number[][] = [];
-    const effectiveThresholds = [Math.max(-1, thresholds[0]), Math.min(1, thresholds[1])];
-    const factor = 2 / (effectiveThresholds[1] - effectiveThresholds[0]);
+    const min = Math.max(-1, thresholds[0]), max = Math.min(1, thresholds[1]);
+    const mean = (min + max) / 2
     for (let i = 0; i < a.length; i++) {
-        const line = [];
+        const line: number[] = [];
         for (let j = 0; j < a[i].length; j++) {
-            line[j] = -1 + (a[i][j] - effectiveThresholds[0]) * factor;
+            line[j] = Math.max(0, 1 - Math.abs(mean - a[i][j]) / ((max - min) / 2));
         }
         result.push(line);
     }
     return result;
 }
 
-export const multiplyNoises = (a: number[][], b: number[][]) => {
+export const multiply = (a: number[][], b: number[][]): number[][] => {
     const result: number[][] = [];
     for (let i = 0; i < a.length; i++) {
-        const line = [];
+        const line: number[] = [];
         for (let j = 0; j < a[i].length; j++) {
-            line[j] = a[i][j] * b[i][j];
+            if (a[i][j] === 0 || b[i][j] === 0) {
+                line[j] = 0;
+            } else {
+                line[j] = a[i][j] * b[i][j];
+            }
         }
         result.push(line);
     }
