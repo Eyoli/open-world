@@ -8,10 +8,10 @@ export class BiomeView extends Graphics {
 
         const drawablePolygon = biome.polygon.map(([y, x]) => ({x, y} as PointData));
         this.poly(drawablePolygon);
-        if (biome.config.texture) {
-            this.fill({texture: Texture.from(biome.config.texture), color: biome.config.color});
+        if (biome.texture) {
+            this.fill({texture: Texture.from(biome.texture), color: biome.color});
         } else {
-            this.fill({color: biome.config.color});
+            this.fill({color: biome.color});
         }
     }
 }

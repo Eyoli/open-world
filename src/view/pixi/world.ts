@@ -1,4 +1,4 @@
-import {Application, Container, ContainerChild, Graphics, Mesh, Sprite, Texture} from "pixi.js";
+import {Application, Container, ContainerChild, Graphics, Sprite, Texture} from "pixi.js";
 import {Item} from "../../domain/model/item";
 import {World} from "../../domain/model/world";
 import {createAdminViewport} from "./controls";
@@ -58,7 +58,7 @@ export class WorldContainer {
             this.renderChunks();
 
             const biome = world.getBiomeAt(world.center);
-            this.ui.updateCurrentBiome(biome.config.type);
+            this.ui.updateCurrentBiome(biome.name);
         });
     }
 

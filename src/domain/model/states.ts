@@ -62,7 +62,7 @@ export class MovingState extends HandlingTarget {
         if (this.target) return new AttackingState(this.target);
 
         pokemon.face(this.direction)
-        pokemon.move()
+        pokemon.moveForward(world)
         const rand = randomPercentage()
         if (rand < 2) {
             return new IdleState();
@@ -80,10 +80,10 @@ export class AttackingState extends PokemonState {
         super();
     }
 
-    act(pokemon: Pokemon): PokemonState {
+    act(pokemon: Pokemon, world: World): PokemonState {
         if (pokemon.distanceTo(this.target) > 50) {
             pokemon.facePokemon(this.target)
-            pokemon.move()
+            pokemon.moveForward(world)
             return this
         } else if (this.lastAttack > 30) {
             this.lastAttack = 0

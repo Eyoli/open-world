@@ -19,7 +19,8 @@ export type PokemonGenerationConfig = {
 }
 
 export type BiomeConfig = {
-    type: string
+    name: string
+    type?: "Water" | "Soil"
     preset?: string
     color?: string
     texture?: string

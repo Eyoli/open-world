@@ -103,7 +103,7 @@ export class World {
         const biome = this.getBiomeAt(position);
         if (!biome) return null;
 
-        const pokemonData = pokedex.generateRandomPokemon(biome.config);
+        const pokemonData = pokedex.generateRandomPokemon(biome);
         if (!pokemonData) return null;
 
         return new Pokemon(pokemonData, position, Direction.UP);

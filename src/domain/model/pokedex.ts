@@ -1,13 +1,16 @@
 import {csv} from 'd3-fetch'
-import {BiomeConfig, PokemonConfig} from "./config";
+import {PokemonConfig} from "./config";
 import {randomUniform} from "../utils/random";
-import {Generations, Pokemon as SmogonPokemon, toID} from "@smogon/calc";
+import {Pokemon as SmogonPokemon, toID} from "@smogon/calc";
+import {Biome} from "./biome";
+import {Dex} from '@pkmn/dex';
+import {Generations} from '@pkmn/data';
 
-const POKEMON_GEN = Generations.get(9)
+const POKEMON_GEN = new Generations(Dex).get(9)
 
 const randomizer = randomUniform()
 
-const randomPokemon = (biome: BiomeConfig) => {
+const randomPokemon = (biome: Biome) => {
     if (!biome.pokemons || biome.pokemons.length < 1) return null
     const unwrapped = biome.pokemons.flatMap((pConf: PokemonConfig) => pConf.ids.map(id => ({id, w: pConf.w})))
 
@@ -37,7 +40,7 @@ export class Pokedex {
         return this.data.get(id.toString())
     }
 
-    generateRandomPokemon(biome: BiomeConfig) {
+    generateRandomPokemon(biome: Biome) {
         const id = randomPokemon(biome)
         if (!id) return null
 
@@ -46,7 +49,7 @@ export class Pokedex {
             return {
                 id,
                 generalData: pokedexEntry,
-                battleData: new SmogonPokemon(POKEMON_GEN, toID(pokedexEntry["Pokemon"]))
+                battleData: new SmogonPokemon(POKEMON_GEN.dex.gen, toID(pokedexEntry["Pokemon"]))
             } as PokemonData
         } catch (e) {
             console.error(`Error generating pokemon ${toID(pokedexEntry["Pokemon"])} (${id})`, e)

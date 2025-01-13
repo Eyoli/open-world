@@ -37,9 +37,21 @@ export class Pokemon {
         this.direction = direction
     }
 
-    move() {
-        this.position.x += DIRECTION_VECTOR[this.direction].x * this.speed;
-        this.position.y += DIRECTION_VECTOR[this.direction].y * this.speed;
+    moveForward(world: World) {
+        const nextPosition = {
+            x: this.position.x + DIRECTION_VECTOR[this.direction].x * this.speed,
+            y: this.position.y + DIRECTION_VECTOR[this.direction].y * this.speed
+        }
+        if (this.canMoveTo(nextPosition, world)) {
+            this.position = nextPosition;
+        }
+    }
+
+    private canMoveTo(position: Position, world: World) {
+        const biome = world.getBiomeAt(position);
+        return biome.type === "Soil"
+            || this.data.battleData.types.includes("Water")
+            || this.data.battleData.types.includes("Flying")
     }
 
     attacked(result: Result) {
