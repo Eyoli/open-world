@@ -14,6 +14,9 @@ const DIRECTION_VECTOR = [
 
 export class Pokemon {
     private state: PokemonState = new IdleState();
+    private _target?: Pokemon;
+
+    readonly visibility = 500;
 
     constructor(
         public data: PokemonData,
@@ -42,9 +45,11 @@ export class Pokemon {
             x: this.position.x + DIRECTION_VECTOR[this.direction].x * this.speed,
             y: this.position.y + DIRECTION_VECTOR[this.direction].y * this.speed
         }
-        if (this.canMoveTo(nextPosition, world)) {
+        const canMove = this.canMoveTo(nextPosition, world);
+        if (canMove) {
             this.position = nextPosition;
         }
+        return canMove;
     }
 
     private canMoveTo(position: Position, world: World) {
@@ -91,5 +96,25 @@ export class Pokemon {
 
     isKO() {
         return this.data.battleData.curHP() <= 0;
+    }
+
+    updateTarget(world: World) {
+        if (this.target && this.target.isKO()) {
+            this._target = undefined;
+        } else if (!this.target) {
+            const nearbyPokemons = world.getNearbyPokemons(this, this.visibility);
+            const target = nearbyPokemons.find(({candidate}) => candidate.isEnemyOf(this));
+            this._target = target?.candidate
+        }
+
+        return this._target;
+    }
+
+    isEnemyOf(pokemon: Pokemon) {
+        return !this.data.battleData.types.some(type => pokemon.data.battleData.types.includes(type))
+    }
+
+    get target() {
+        return this._target;
     }
 }

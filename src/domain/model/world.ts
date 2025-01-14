@@ -22,23 +22,28 @@ export class World {
         this.tileSize = config.chunkSize / config.chunkDensity;
     }
 
-    seeAround(pokemon: Pokemon, radius: number) {
+    getNearbyPokemons(pokemon: Pokemon, radius: number) {
         const results: { candidate: Pokemon, distance: number }[] = [];
+        const xmin = pokemon.position.x - radius;
+        const ymin = pokemon.position.y - radius;
+        const xmax = pokemon.position.x + radius;
+        const ymax = pokemon.position.y + radius;
         this.pokemonTree.visit((node, x0, y0, x1, y1) => {
             if (!node.length) {
                 let leaf = node as unknown as QuadtreeLeaf<{ x: number, y: number, data: Pokemon }>
                 do {
-                    let candidate = leaf.data.data;
-                    const distance = pokemon.distanceTo(candidate);
-                    if (pokemon != candidate && distance < radius) {
-                        results.push({candidate, distance});
+                    let data = leaf.data;
+                    if (data.x >= xmin && data.x < xmax && data.y >= ymin && data.y < ymax) {
+                        results.push({candidate: data.data, distance: pokemon.distanceTo(data.data)});
                     }
                     leaf = leaf.next
                 } while (leaf);
             }
-            return x0 <= pokemon.position.x && pokemon.position.x < x1 && y0 <= pokemon.position.y && pokemon.position.y < y1;
+            return x0 >= xmax || y0 >= ymax || x1 < xmin || y1 < ymin;
         })
-        return results.sort((a, b) => a.distance - b.distance);
+        return results
+            .filter(({candidate, distance}) => candidate !== pokemon && distance <= radius)
+            .sort((a, b) => a.distance - b.distance);
     }
 
     addPokemon() {

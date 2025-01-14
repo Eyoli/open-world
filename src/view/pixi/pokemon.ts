@@ -5,6 +5,7 @@ import {loadTextures} from "./common/texture";
 
 export class PokemonSprite extends Sprite {
     private readonly hpBar: Graphics;
+    private readonly lineToTarget: Graphics;
 
     constructor(
         private readonly sprites: Map<Direction, AnimatedSprite>,
@@ -16,6 +17,9 @@ export class PokemonSprite extends Sprite {
         }
         this.hpBar = new Graphics();
         this.addChild(this.hpBar);
+
+        this.lineToTarget = new Graphics();
+        this.addChild(this.lineToTarget);
     }
 
     update = () => {
@@ -31,6 +35,17 @@ export class PokemonSprite extends Sprite {
             activeSprite.play();
         }
         this.updateHpBar();
+        // this.updateLineToTarget();
+    }
+
+    private updateLineToTarget = () => {
+        this.lineToTarget.clear();
+        if (this.pokemon.target) {
+            this.lineToTarget.lineTo(this.pokemon.target.position.x - this.x, this.pokemon.target.position.y - this.y);
+            this.lineToTarget.stroke({color: "#ff0000", width: 5});
+        }
+        this.lineToTarget.circle(0, 0, this.pokemon.visibility);
+        this.lineToTarget.stroke({color: "#ff0000", width: 5});
     }
 
     private updateHpBar = () => {

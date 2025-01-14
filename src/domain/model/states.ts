@@ -17,31 +17,10 @@ export abstract class PokemonState {
     }
 }
 
-export abstract class HandlingTarget extends PokemonState {
-    protected constructor(protected target?: Pokemon) {
-        super();
-    }
-
-    abstract act(pokemon: Pokemon, world: World): PokemonState
-
-    findTarget(pokemon: Pokemon, world: World) {
-        if (this.target && !this.target.isKO()) return
-
-        const targets = world.seeAround(pokemon, 500)
-        if (targets.length > 0) {
-            this.target = targets[0].candidate
-        }
-    }
-}
-
-export class IdleState extends HandlingTarget {
-    constructor(target?: Pokemon) {
-        super(target);
-    }
-
+export class IdleState extends PokemonState {
     act(pokemon: Pokemon, world: World): PokemonState {
-        this.findTarget(pokemon, world)
-        if (this.target) return new AttackingState(this.target);
+        const target = pokemon.updateTarget(world)
+        if (target) return new AttackingState();
 
         const rand = randomPercentage()
         if (rand < 10) return new MovingState();
@@ -50,21 +29,16 @@ export class IdleState extends HandlingTarget {
     }
 }
 
-export class MovingState extends HandlingTarget {
-    constructor(target?: Pokemon) {
-        super(target);
-    }
-
+export class MovingState extends PokemonState {
     private readonly direction: number = randomDirection();
 
     act(pokemon: Pokemon, world: World): PokemonState {
-        this.findTarget(pokemon, world)
-        if (this.target) return new AttackingState(this.target);
+        const target = pokemon.updateTarget(world)
+        if (target) return new AttackingState();
 
         pokemon.face(this.direction)
-        pokemon.moveForward(world)
         const rand = randomPercentage()
-        if (rand < 2) {
+        if (!pokemon.moveForward(world) || rand < 2) {
             return new IdleState();
         }
         return this;
@@ -74,15 +48,12 @@ export class MovingState extends HandlingTarget {
 export class AttackingState extends PokemonState {
     private lastAttack = 31;
 
-    constructor(
-        private readonly target: Pokemon
-    ) {
-        super();
-    }
-
     act(pokemon: Pokemon, world: World): PokemonState {
-        if (pokemon.distanceTo(this.target) > 50) {
-            pokemon.facePokemon(this.target)
+        const target = pokemon.updateTarget(world)
+        if (!target) return new IdleState();
+
+        if (pokemon.distanceTo(target) > 50) {
+            pokemon.facePokemon(target)
             pokemon.moveForward(world)
             return this
         } else if (this.lastAttack > 30) {
@@ -90,8 +61,8 @@ export class AttackingState extends PokemonState {
             this.attack(pokemon)
             return this
         }
-        this.lastAttack++
-        return new IdleState();
+        this.lastAttack++;
+        return this;
     }
 
     attack(pokemon: Pokemon) {
@@ -99,10 +70,10 @@ export class AttackingState extends PokemonState {
         const result = calculate(
             gen,
             pokemon.data.battleData,
-            this.target.data.battleData,
+            pokemon.target.data.battleData,
             new Move(gen, 'Aurora Beam')
         );
         pokemon.attacked(result)
-        this.target.defended(result)
+        pokemon.target.defended(result)
     }
 }
