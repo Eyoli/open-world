@@ -1,10 +1,10 @@
 import {calculate, Move} from "@smogon/calc";
 import {Pokemon} from "./pokemon";
-import {randomInt} from "../utils/random";
+import {randomDirection, randomInt} from "../utils/random";
 import {World} from "./world";
 
-const randomPercentage = randomInt(0, 100)
-const randomDirection = randomInt(0, 3)
+const percentageGenerator = randomInt(0, 100)
+const directionGenerator = randomDirection()
 
 export abstract class PokemonState {
     protected abstract act(pokemon: Pokemon, world: World): PokemonState
@@ -22,7 +22,7 @@ export class IdleState extends PokemonState {
         const target = pokemon.updateTarget(world)
         if (target) return new AttackingState();
 
-        const rand = randomPercentage()
+        const rand = percentageGenerator()
         if (rand < 10) return new MovingState();
 
         return this;
@@ -30,14 +30,14 @@ export class IdleState extends PokemonState {
 }
 
 export class MovingState extends PokemonState {
-    private readonly direction: number = randomDirection();
+    private readonly direction = directionGenerator();
 
     act(pokemon: Pokemon, world: World): PokemonState {
         const target = pokemon.updateTarget(world)
         if (target) return new AttackingState();
 
         pokemon.face(this.direction)
-        const rand = randomPercentage()
+        const rand = percentageGenerator()
         if (!pokemon.moveForward(world) || rand < 2) {
             return new IdleState();
         }

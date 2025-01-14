@@ -120,7 +120,7 @@ export const config: WorldConfig = {
                 {
                     type: "65C40BB9-5DE4-4694-9E90-3B4C6113583E",
                     w: 1,
-                    scale: 2
+                    scale: 1
                 }
             ]
         },
@@ -419,7 +419,7 @@ export const config: WorldConfig = {
                 {
                     type: "A4333FCB-C4F9-4340-AEBE-EAD3B1DF72C3",
                     w: 2,
-                    scale: 2
+                    scale: 1
                 }
             ],
             pokemons: [

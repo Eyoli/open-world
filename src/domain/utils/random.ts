@@ -2,6 +2,7 @@ import * as d3 from "d3-random";
 import {Delaunay} from "d3-delaunay";
 import {polygonCentroid} from "d3-polygon";
 import Polygon = Delaunay.Polygon;
+import {Direction} from "../model/types";
 
 const seed = Math.random()
 const source = d3.randomLcg(seed)
@@ -9,9 +10,9 @@ const source = d3.randomLcg(seed)
 export const randomUniform = d3.randomUniform.source(source)
 export const randomInt = d3.randomInt.source(source)
 
-export const randomAmong = <T>(items: T[]) => {
-    const random = randomInt(0, items.length);
-    return () => items[random()];
+export const randomDirection = () => {
+    const randInt = randomInt(0, 3)
+    return () => randInt() as Direction
 }
 
 export const rand2d = (xMin: number, yMin: number, xMax: number, yMax: number) => {

@@ -36,7 +36,7 @@ export class Pokemon {
         this.state = this.state.actIfNotKO(this, world);
     }
 
-    face(direction: number) {
+    face(direction: Direction) {
         this.direction = direction
     }
 
@@ -111,7 +111,7 @@ export class Pokemon {
     }
 
     isEnemyOf(pokemon: Pokemon) {
-        return !this.data.battleData.types.some(type => pokemon.data.battleData.types.includes(type))
+        return !this.data.battleData.types.some(type => pokemon.data.battleData.types.includes(type));
     }
 
     get target() {
