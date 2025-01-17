@@ -35,16 +35,20 @@ export class PokemonSprite extends Sprite {
             activeSprite.play();
         }
         this.updateHpBar();
-        // this.updateLineToTarget();
+        //this.renderDebugInfo();
     }
 
-    private updateLineToTarget = () => {
+    private renderDebugInfo = () => {
         this.lineToTarget.clear();
         if (this.pokemon.target) {
             this.lineToTarget.lineTo(this.pokemon.target.position.x - this.x, this.pokemon.target.position.y - this.y);
             this.lineToTarget.stroke({color: "#ff0000", width: 5});
         }
         this.lineToTarget.circle(0, 0, this.pokemon.visibility);
+        this.lineToTarget.stroke({color: "#ff0000", width: 5});
+
+        this.lineToTarget.moveTo(this.x, this.y)
+        this.lineToTarget.lineTo(this.pokemon.directionVector.x * 100, this.pokemon.directionVector.y * 100);
         this.lineToTarget.stroke({color: "#ff0000", width: 5});
     }
 
@@ -83,9 +87,9 @@ export const createPokemonSprite = (pokemon: Pokemon): PokemonSprite => {
 const getPokemonTextures = (pokemon: Pokemon): [Direction, Texture[]][] => {
     const id = pokemon.data.id.toString().padStart(3, '0')
     return [
-        [Direction.UP, loadTextures([`o-b_hs_${id}_1.png`, `o-b_hs_${id}_2.png`])],
-        [Direction.DOWN, loadTextures([`o_hs_${id}_1.png`, `o_hs_${id}_2.png`])],
-        [Direction.LEFT, loadTextures([`o-l_hs_${id}_1.png`, `o-l_hs_${id}_2.png`])],
-        [Direction.RIGHT, loadTextures([`o-r_hs_${id}_1.png`, `o-r_hs_${id}_2.png`])]
+        [Direction.DOWN, loadTextures([`o-b_hs_${id}_1.png`, `o-b_hs_${id}_2.png`])],
+        [Direction.UP, loadTextures([`o_hs_${id}_1.png`, `o_hs_${id}_2.png`])],
+        [Direction.RIGHT, loadTextures([`o-l_hs_${id}_1.png`, `o-l_hs_${id}_2.png`])],
+        [Direction.LEFT, loadTextures([`o-r_hs_${id}_1.png`, `o-r_hs_${id}_2.png`])]
     ];
 }

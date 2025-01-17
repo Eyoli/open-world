@@ -1,5 +1,6 @@
 chunkSize: 1000
 chunkDensity: 40
+loadingDistance: 3
 pokemons:
   maxNumber: 50
   maxDistanceToCenter: 2000

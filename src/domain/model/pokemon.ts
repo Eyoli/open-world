@@ -6,15 +6,16 @@ import {World} from "./world";
 
 
 const DIRECTION_VECTOR = [
-    {x: Math.cos(Math.PI), y: Math.sin(Math.PI)},
-    {x: Math.cos(3 * Math.PI / 2), y: Math.sin(3 * Math.PI / 2)},
     {x: Math.cos(0), y: Math.sin(0)},
     {x: Math.cos(Math.PI / 2), y: Math.sin(Math.PI / 2)},
+    {x: Math.cos(Math.PI), y: Math.sin(Math.PI)},
+    {x: Math.cos(3 * Math.PI / 2), y: Math.sin(3 * Math.PI / 2)},
 ]
 
 export class Pokemon {
     private state: PokemonState = new IdleState();
     private _target?: Pokemon;
+    public directionVector: { x: number, y: number }
 
     readonly visibility = 500;
 
@@ -24,6 +25,7 @@ export class Pokemon {
         public direction: Direction,
         public speed = 3
     ) {
+        this.directionVector = DIRECTION_VECTOR[direction];
     }
 
     distanceTo(pokemon: Pokemon) {
@@ -36,14 +38,15 @@ export class Pokemon {
         this.state = this.state.actIfNotKO(this, world);
     }
 
-    face(direction: Direction) {
-        this.direction = direction
+    face(rad: number) {
+        this.direction = Math.round((rad >= 0 ? rad : (Math.PI * 2 + rad)) / (Math.PI / 2)) % 4;
+        this.directionVector = {x: Math.cos(rad), y: Math.sin(rad)};
     }
 
     moveForward(world: World) {
         const nextPosition = {
-            x: this.position.x + DIRECTION_VECTOR[this.direction].x * this.speed,
-            y: this.position.y + DIRECTION_VECTOR[this.direction].y * this.speed
+            x: this.position.x + this.directionVector.x * this.speed,
+            y: this.position.y + this.directionVector.y * this.speed
         }
         const canMove = this.canMoveTo(nextPosition, world);
         if (canMove) {
@@ -87,11 +90,8 @@ export class Pokemon {
     facePokemon(target: Pokemon) {
         const dx = target.position.x - this.position.x;
         const dy = target.position.y - this.position.y;
-        if (Math.abs(dx) > Math.abs(dy)) {
-            this.direction = dx > 0 ? Direction.RIGHT : Direction.LEFT
-        } else {
-            this.direction = dy > 0 ? Direction.DOWN : Direction.UP
-        }
+        const rad = Math.atan2(dy, dx);
+        this.face(rad);
     }
 
     isKO() {

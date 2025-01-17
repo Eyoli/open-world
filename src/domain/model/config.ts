@@ -10,6 +10,7 @@ export type BaseConfig = {
     pokemons: PokemonGenerationConfig
     chunkSize: number
     chunkDensity: number
+    loadingDistance: number
 }
 
 export type AssetsConfig = { alias: string, src: string }[]

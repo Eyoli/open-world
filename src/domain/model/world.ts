@@ -14,7 +14,6 @@ export class World {
     center: Position = {x: 0, y: 0};
 
     constructor(
-        private readonly loadingDistance: number,
         readonly config: WorldConfig,
         private readonly pokedex: Pokedex
     ) {
@@ -94,7 +93,7 @@ export class World {
     }
 
     getVisibleChunks() {
-        return this.chunksHolder.getVisibleChunks(this.center, this.loadingDistance);
+        return this.chunksHolder.getVisibleChunks(this.center, this.config.base.loadingDistance);
     }
 
     getBiomeAt(position: Position) {

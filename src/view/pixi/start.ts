@@ -25,7 +25,7 @@ export const start = async (
 
     // render the world
     const pokedex = await loadNationalPokedex();
-    const world = new World(3, config, pokedex);
+    const world = new World(config, pokedex);
 
     const worldContainer = new WorldContainer(app, width, height, world);
 

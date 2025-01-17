@@ -1,30 +1,26 @@
-import {Application, Container, DisplacementFilter, Sprite} from "pixi.js"
+import {DisplacementFilter, Sprite, Texture} from "pixi.js"
 
-export const renderWater = (app: Application, width: number, height: number) => {
-    const container = new Container();
-    const displacementSprite = Sprite.from('displacement');
-    console.log(displacementSprite.x)
+class DisplacementSprite extends Sprite {
+    private readonly sprite: Sprite;
+    private readonly filter: DisplacementFilter
 
-    const waterBackground = Sprite.from('water-bg');
-    waterBackground.width = width;
-    waterBackground.height = height;
+    constructor(underlyingSprite: Sprite, scale: { x: number, y: number } = {x: 50, y: 100}) {
+        super();
+        this.sprite = new Sprite({
+            texture: Texture.from("displacement"),
+            width: underlyingSprite.width,
+            height: underlyingSprite.height
+        });
+        this.filter = new DisplacementFilter({sprite: this.sprite, scale});
+        underlyingSprite.filters = [this.filter];
+    }
 
-    container.addChild(displacementSprite);
-    container.addChild(waterBackground);
-
-    const displacementFilter = new DisplacementFilter(displacementSprite);
-    waterBackground.filters = [displacementFilter];
-    displacementFilter.scale.x = 35;
-    displacementFilter.scale.y = 35;
-
-    app.ticker.add(() => {
-        if (displacementSprite.position) {
-            displacementSprite.x += 1;
-            if (displacementSprite.x > displacementSprite.width) {
-                displacementSprite.x = 0;
+    update() {
+        if (this.sprite) {
+            this.sprite.x++;
+            if (this.sprite.x > this.sprite.width) {
+                this.sprite.x = 0;
             }
         }
-    });
-
-    return container;
+    }
 }
