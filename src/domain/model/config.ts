@@ -1,13 +1,20 @@
 export type WorldConfig = {
-    pokemons: PokemonGenerationConfig
-    chunkSize: number
-    chunkDensity: number
-    assets: { alias: string, src: string }[]
-    biomes: { [key: string]: BiomeConfig }
-    factors: { [key: string]: FactorConfig }
+    base: BaseConfig
+    assets: AssetsConfig
+    biomes: BiomesConfig
+    factors: FactorsConfig
     terrain: TerrainConfig
 }
 
+export type BaseConfig = {
+    pokemons: PokemonGenerationConfig
+    chunkSize: number
+    chunkDensity: number
+}
+
+export type AssetsConfig = { alias: string, src: string }[]
+
+export type FactorsConfig = { [key: string]: FactorConfig }
 export type FactorConfig = {
     density: number
     octaves?: number
@@ -18,6 +25,7 @@ export type PokemonGenerationConfig = {
     maxDistanceToCenter: number
 }
 
+export type BiomesConfig = { [key: string]: BiomeConfig }
 export type BiomeConfig = {
     name: string
     type?: "Water" | "Soil"

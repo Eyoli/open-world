@@ -19,7 +19,7 @@ export class World {
         private readonly pokedex: Pokedex
     ) {
         this.chunksHolder = new ChunksHolder(config);
-        this.tileSize = config.chunkSize / config.chunkDensity;
+        this.tileSize = config.base.chunkSize / config.base.chunkDensity;
     }
 
     getNearbyPokemons(pokemon: Pokemon, radius: number) {
@@ -47,7 +47,7 @@ export class World {
     }
 
     addPokemon() {
-        const {config: {pokemons: {maxNumber, maxDistanceToCenter}}} = this;
+        const {config: {base: {pokemons: {maxNumber, maxDistanceToCenter}}}} = this;
 
         const added: Pokemon[] = [];
         if (this.pokemons.length < maxNumber) {
@@ -83,7 +83,7 @@ export class World {
             const dx = pokemon.position.x - this.center.x;
             const dy = pokemon.position.y - this.center.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            return pokemon.isKO() || (distance > this.config.pokemons.maxDistanceToCenter)
+            return pokemon.isKO() || (distance > this.config.base.pokemons.maxDistanceToCenter)
         })
 
         pokemonsToRemove.forEach((pokemon) => {

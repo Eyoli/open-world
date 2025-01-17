@@ -1,0 +1,69 @@
+factor: "HEIGHT"
+sub:
+  - threshold: 0.4
+    type: "DEEP_OCEAN"
+  - threshold: 0.53
+    type: "OCEAN"
+  - threshold: 0.58
+    type: "BEACH"
+  - threshold: 0.63
+    factor: "CLIMATE"
+    sub:
+      - threshold: 0.5
+        type: "PLAIN"
+      - threshold: 1
+        type: "DESERT"
+  - threshold: 0.9
+    factor: "CLIMATE"
+    sub:
+      - threshold: 0.5
+        factor: "HUMIDITY"
+        sub:
+          - threshold: 0.95
+            factor: "NATURE"
+            sub:
+              - threshold: 0.7
+                type: "FOREST"
+              - threshold: 1
+                type: "PLAIN"
+          - threshold: 1
+            type: "LAKE"
+      - threshold: 1
+        factor: "HUMIDITY"
+        sub:
+          - threshold: 0.9
+            factor: "NATURE"
+            sub:
+              - threshold: 0.3
+                type: "RED_FOREST"
+              - threshold: 1
+                type: "DESERT"
+          - threshold: 0.96
+            type: "BEACH"
+          - threshold: 1
+            type: "OASIS"
+  - threshold: 0.97
+    factor: "HUMIDITY"
+    sub:
+      - threshold: 0.9
+        factor: "NATURE"
+        sub:
+          - threshold: 0.7
+            type: "MOUNTAIN"
+          - threshold: 1
+            type: "HIGH_FOREST"
+      - threshold: 1
+        type: "LAKE"
+  - threshold: 1
+    factor: "HUMIDITY"
+    sub:
+      - threshold: 0.9
+        factor: "NATURE"
+        sub:
+          - threshold: 0.7
+            type: "SNOWY_MOUNTAIN"
+          - threshold: 1
+            type: "SNOWY_FOREST"
+      - threshold: 1
+        type: "GLACIER"
+

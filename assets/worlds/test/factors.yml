@@ -1,0 +1,12 @@
+HEIGHT:
+  density: 800
+  octaves: 3
+NATURE:
+  density: 40
+  octaves: 3
+CLIMATE:
+  density: 1000
+  octaves: 1
+HUMIDITY:
+  density: 40
+  octaves: 1

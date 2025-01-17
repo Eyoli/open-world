@@ -11,7 +11,7 @@ import {BiomeView} from "./biome";
 
 export class WorldContainer {
     private readonly container: Container<ContainerChild>;
-    private readonly backgroundLayer: Container<ContainerChild>;
+    private readonly backgroundLayer: Container<BiomeView>;
     private readonly itemLayer: Container<Sprite>;
     private readonly collisionLayer: Graphics = new Graphics();
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
@@ -124,7 +124,6 @@ export class WorldContainer {
         if (this.visibleChunks.length == 0 || this.visibleChunks.some(c => !ids.includes(c.id()))) {
             this.clearChunks();
 
-            console.log("Visible chunks updated");
             for (const chunk of updateVisibleChunks) {
                 for (const item of chunk.items) {
                     const itemView = createItemView(item, world);

@@ -47,8 +47,8 @@ export class ChunksHolder {
         }
         this.factors = config.factors;
         this.terrain = config.terrain;
-        this.chunkSize = config.chunkSize
-        this.tilesNumber = config.chunkDensity
+        this.chunkSize = config.base.chunkSize
+        this.tilesNumber = config.base.chunkDensity
 
         for (let factor in this.factors) {
             const {density, octaves} = this.factors[factor];

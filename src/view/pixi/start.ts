@@ -2,13 +2,14 @@ import {Application} from 'pixi.js';
 import {WorldContainer} from "./world";
 import {loadAssets} from "./assets";
 import {World} from "../../domain/model/world";
-import {config} from "../../worldConfig"
 import {loadNationalPokedex} from "../../domain/model/pokedex";
 import {createTicker} from "./common/ticker";
+import {WorldConfig} from "../../domain/model/config";
 
 export const start = async (
     width: number,
-    height: number
+    height: number,
+    config: WorldConfig
 ) => {
     // Create a new application
     const app = new Application();
