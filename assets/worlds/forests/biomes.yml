@@ -1,0 +1,20 @@
+PLAIN:
+  name: "Plain"
+  color: "#63a131"
+  texture: "grass"
+  pItem: 0
+  pokemons:
+    - { ids: [ 16, 19, 21, 22, 29, 32 ], w: 4 }
+    - { ids: [ 17, 20, 30, 33 ], w: 2 }
+    - { ids: [ 18, 31, 34 ], w: 1 }
+FOREST:
+  name: "Forest"
+  color: "#63a131"
+  texture: "grass"
+  pItem: 1
+  items:
+    - { type: "3569D858-DDBE-4996-B084-DC98A92A4229", w: 1, scale: 2 }
+    - { type: "7A9B1D07-B0DB-4F3D-88FE-5DEC0500D315", w: 1, scale: 2 }
+    - { type: "38484192-00F7-4C2C-A600-B3734ACB9CE2", w: 1, scale: 2 }
+    - { type: "AD6D7017-39FB-4D29-9DDA-EE5C734DCB01", w: 1, scale: 2 }
+    - { type: "10E01ABD-1381-4141-A1F2-F5EB750B1CD6", w: 1, scale: 2 }

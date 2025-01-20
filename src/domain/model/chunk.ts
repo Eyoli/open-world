@@ -134,18 +134,16 @@ export class ChunksHolder {
         return tiles
             .flatMap((line, x) => line
                 .map((biome, y) => {
-                    if (biome.items.length < 1 || randomizer() > biome.pItem) return null;
+                    if (!Array.isArray(biome.items) || randomizer() > biome.pItem) return null;
 
                     const totalWeight = biome.items.reduce((acc, pConf) => acc + pConf.w, 0);
                     const random = randomizer() * totalWeight;
                     let total = 0;
-                    return {
-                        x, y,
-                        item: biome.items.find(pConf => {
-                            total += pConf.w;
-                            return random <= total;
-                        })
-                    };
+                    const item = biome.items.find(pConf => {
+                        total += pConf.w;
+                        return random <= total;
+                    })
+                    return item ? {x, y, item} : null;
                 })
                 .filter((item) => item)
                 .map(({

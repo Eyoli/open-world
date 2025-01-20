@@ -26,7 +26,7 @@ const randomPokemon = (biome: Biome) => {
 export type PokemonData = {
     id: number,
     generalData: any,
-    battleData: SmogonPokemon
+    battleData: SmogonPokemon,
 }
 
 export class Pokedex {
@@ -52,7 +52,7 @@ export class Pokedex {
                 battleData: new SmogonPokemon(POKEMON_GEN.dex.gen, toID(pokedexEntry["Pokemon"]))
             } as PokemonData
         } catch (e) {
-            console.error(`Error generating pokemon ${toID(pokedexEntry["Pokemon"])} (${id})`, e)
+            console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${id})`, e)
         }
 
         return null

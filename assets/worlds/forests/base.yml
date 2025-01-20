@@ -1,0 +1,6 @@
+chunkSize: 920
+chunkDensity: 10
+loadingDistance: 3
+pokemons:
+  maxNumber: 50
+  maxDistanceToCenter: 2000

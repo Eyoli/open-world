@@ -1,0 +1,6 @@
+- alias: "TREES"
+  src: "dist/images/trees.json"
+- alias: "grass"
+  src: "dist/images/grass.png"
+- alias: "POKEMONS"
+  src: "dist/images/pokemon/texture.json"

@@ -15,22 +15,22 @@ const DIRECTION_VECTOR = [
 export class Pokemon {
     private state: PokemonState = new IdleState();
     private _target?: Pokemon;
-    public directionVector: { x: number, y: number }
+    private _directionVector: { x: number, y: number }
 
     readonly visibility = 500;
+    readonly speed = 3;
 
     constructor(
-        public data: PokemonData,
-        public position: Position,
-        public direction: Direction,
-        public speed = 3
+        readonly data: PokemonData,
+        private _position: Position,
+        private _direction: Direction
     ) {
-        this.directionVector = DIRECTION_VECTOR[direction];
+        this._directionVector = DIRECTION_VECTOR[_direction];
     }
 
     distanceTo(pokemon: Pokemon) {
-        const dx = this.position.x - pokemon.position.x;
-        const dy = this.position.y - pokemon.position.y;
+        const dx = this._position.x - pokemon._position.x;
+        const dy = this._position.y - pokemon._position.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -39,18 +39,18 @@ export class Pokemon {
     }
 
     face(rad: number) {
-        this.direction = Math.round((rad >= 0 ? rad : (Math.PI * 2 + rad)) / (Math.PI / 2)) % 4;
-        this.directionVector = {x: Math.cos(rad), y: Math.sin(rad)};
+        this._direction = Math.round((rad >= 0 ? rad : (Math.PI * 2 + rad)) / (Math.PI / 2)) % 4;
+        this._directionVector = {x: Math.cos(rad), y: Math.sin(rad)};
     }
 
     moveForward(world: World) {
         const nextPosition = {
-            x: this.position.x + this.directionVector.x * this.speed,
-            y: this.position.y + this.directionVector.y * this.speed
+            x: this._position.x + this.directionVector.x * this.speed,
+            y: this._position.y + this.directionVector.y * this.speed
         }
         const canMove = this.canMoveTo(nextPosition, world);
         if (canMove) {
-            this.position = nextPosition;
+            this._position = nextPosition;
         }
         return canMove;
     }
@@ -88,8 +88,8 @@ export class Pokemon {
     }
 
     facePokemon(target: Pokemon) {
-        const dx = target.position.x - this.position.x;
-        const dy = target.position.y - this.position.y;
+        const dx = target._position.x - this._position.x;
+        const dy = target._position.y - this._position.y;
         const rad = Math.atan2(dy, dx);
         this.face(rad);
     }
@@ -116,5 +116,17 @@ export class Pokemon {
 
     get target() {
         return this._target;
+    }
+
+    get direction() {
+        return this._direction;
+    }
+
+    get position() {
+        return this._position;
+    }
+
+    get directionVector() {
+        return this._directionVector;
     }
 }

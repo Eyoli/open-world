@@ -86,7 +86,7 @@ FOREST:
   name: "Forest"
   color: "#558e27"
   texture: "grass"
-  pItem: 0.1
+  pItem: 0.08
   pokemons:
     - { ids: [ 10, 13, 43, 46 ], w: 4 }
     - { ids: [ 11, 14, 44, 47 ], w: 2 }

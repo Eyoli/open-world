@@ -1,0 +1,6 @@
+factor: "NATURE"
+sub:
+  - threshold: 0.3
+    type: "PLAIN"
+  - threshold: 1
+    type: "FOREST"
