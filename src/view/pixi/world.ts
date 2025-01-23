@@ -17,7 +17,7 @@ export class WorldContainer {
     private pokemons: Map<Pokemon, PokemonSprite> = new Map();
     private readonly viewport: Viewport;
     private visibleChunks: Chunk[] = [];
-    private ui: UserInterface;
+    private readonly ui: UserInterface;
 
     constructor(
         private readonly app: Application,
@@ -51,7 +51,7 @@ export class WorldContainer {
     render = () => {
         const {world} = this;
 
-        this.renderChunks()
+        this.renderChunks();
 
         this.viewport.on('pointerdown', (event) => {
             world.center = this.viewport.toWorld({x: event.x, y: event.y});
@@ -88,12 +88,6 @@ export class WorldContainer {
     updateTree = () => {
         this.world.updateTree();
         this.collisionLayer.clear();
-        this.world.pokemonTree.visit((node, x1, y1, x2, y2) => {
-            if (x2 > x1 && y2 > y1) {
-                this.collisionLayer.rect(x1, y1, x2 - x1, y2 - y1);
-                this.collisionLayer.stroke({color: 0xff0000, width: 5});
-            }
-        });
         sortItems(this.itemLayer.children);
     }
 

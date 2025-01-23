@@ -29,8 +29,8 @@ export class Pokemon {
     }
 
     distanceTo(pokemon: Pokemon) {
-        const dx = this._position.x - pokemon._position.x;
-        const dy = this._position.y - pokemon._position.y;
+        const dx = this._position.x - pokemon.position.x;
+        const dy = this._position.y - pokemon.position.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -103,8 +103,7 @@ export class Pokemon {
             this._target = undefined;
         } else if (!this.target) {
             const nearbyPokemons = world.getNearbyPokemons(this, this.visibility);
-            const target = nearbyPokemons.find(({candidate}) => candidate.isEnemyOf(this));
-            this._target = target?.candidate
+            this._target = nearbyPokemons.find(candidate => candidate.isEnemyOf(this))
         }
 
         return this._target;
