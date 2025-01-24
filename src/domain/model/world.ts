@@ -4,12 +4,11 @@ import {ChunksHolder} from "./chunk";
 import {Pokedex} from "./pokedex";
 import {Pokemon} from "./pokemon";
 import {randomInt} from "../utils/random";
-import {PokemonContainer, QuadTreePokemonContainer} from "./pokemon-container";
+import {GeographicContainer, PokemonContainer} from "./pokemon-container";
 
 
 export class World {
     private readonly chunksHolder: ChunksHolder;
-    private readonly pokemonContainer: PokemonContainer;
     private readonly positionGenerator: () => number;
     private readonly loadingDistance: number;
     private _center: Position = {x: 0, y: 0};
@@ -17,17 +16,18 @@ export class World {
 
     constructor(
         config: WorldConfig,
+        private readonly pokemonContainer: PokemonContainer,
+        private readonly geographicContainer: GeographicContainer<Pokemon>,
         private readonly pokedex: Pokedex
     ) {
         this.chunksHolder = new ChunksHolder(config);
         this.tileSize = config.base.chunkSize / config.base.chunkDensity;
-        this.pokemonContainer = new QuadTreePokemonContainer(config.base.pokemons.maxNumber, config.base.pokemons.maxDistanceToCenter);
         this.positionGenerator = randomInt(-config.base.pokemons.maxDistanceToCenter, config.base.pokemons.maxDistanceToCenter);
         this.loadingDistance = config.base.loadingDistance;
     }
 
     getNearbyPokemons(pokemon: Pokemon, radius: number): Pokemon[] {
-        return this.pokemonContainer.getNearby(pokemon, radius);
+        return this.geographicContainer.getNearby(pokemon, radius);
     }
 
     addPokemon() {
@@ -52,7 +52,7 @@ export class World {
     }
 
     updateTree = () => {
-        this.pokemonContainer.update();
+        this.geographicContainer.update();
     }
 
     removePokemons = () => {

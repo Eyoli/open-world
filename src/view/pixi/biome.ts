@@ -1,4 +1,4 @@
-import {DisplacementFilter, Graphics, PointData, Sprite, Texture} from "pixi.js";
+import {Graphics, PointData, Texture} from "pixi.js";
 
 import {Biome} from "../../domain/model/biome";
 

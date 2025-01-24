@@ -5,6 +5,7 @@ import {World} from "../../domain/model/world";
 import {loadNationalPokedex} from "../../domain/model/pokedex";
 import {createTicker} from "./common/ticker";
 import {WorldConfig} from "../../domain/model/config";
+import {PokemonContainer, QuadTreeGeographicContainer} from "../../domain/model/pokemon-container";
 
 export const start = async (
     width: number,
@@ -25,7 +26,10 @@ export const start = async (
 
     // render the world
     const pokedex = await loadNationalPokedex();
-    const world = new World(config, pokedex);
+
+    const pokemonContainer = new PokemonContainer(config.base.pokemons.maxNumber, config.base.pokemons.maxDistanceToCenter);
+    const geographicContainer = new QuadTreeGeographicContainer(pokemonContainer);
+    const world = new World(config, pokemonContainer, geographicContainer, pokedex);
 
     const worldContainer = new WorldContainer(app, width, height, world);
 

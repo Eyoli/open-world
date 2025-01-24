@@ -1,30 +1,21 @@
 import {Pokemon} from "./pokemon";
 import {quadtree, Quadtree, QuadtreeLeaf} from "d3-quadtree";
 import {Position} from "./types";
+import RBush from "rbush";
 
-export interface PokemonContainer {
-    getNearby: (pokemon: Pokemon, radius: number) => Pokemon[];
+export interface GeographicContainer<T> {
+    getNearby: (object: T, radius: number) => T[];
     update: () => void;
-    isNotFull: () => boolean;
-    iterate: () => IterableIterator<Pokemon>;
-    pokemons: Pokemon[];
-
-    removeInvalidPokemons(center: Position): Pokemon[]
-
-    add(...pokemons: Pokemon[]): void;
 }
 
-abstract class PokemonContainerBase implements PokemonContainer {
+export class PokemonContainer {
     private readonly _pokemons: Pokemon[] = []
 
-    protected constructor(
+    constructor(
         private readonly max: number,
         private readonly maxDistanceToCenter: number,
     ) {
     }
-
-    abstract getNearby: (pokemon: Pokemon, radius: number) => Pokemon[];
-    abstract update: () => void;
 
     isNotFull(): boolean {
         return this._pokemons.length < this.max;
@@ -62,14 +53,15 @@ abstract class PokemonContainerBase implements PokemonContainer {
     }
 }
 
-export class QuadTreePokemonContainer extends PokemonContainerBase {
+export class QuadTreeGeographicContainer implements GeographicContainer<Pokemon> {
     private pokemonTree: Quadtree<{ x: number, y: number, data: Pokemon }> = quadtree()
 
-    constructor(max: number, maxDistanceToCenter: number) {
-        super(max, maxDistanceToCenter);
+    constructor(
+        private readonly container: PokemonContainer
+    ) {
     }
 
-    getNearby = (pokemon: Pokemon, radius: number): Pokemon[] => {
+    getNearby(pokemon: Pokemon, radius: number): Pokemon[] {
         const results: { candidate: Pokemon, distance: number }[] = [];
         const xmin = pokemon.position.x - radius;
         const ymin = pokemon.position.y - radius;
@@ -94,8 +86,8 @@ export class QuadTreePokemonContainer extends PokemonContainerBase {
             .map(({candidate}) => candidate);
     };
 
-    update = (): void => {
-        this.pokemonTree = quadtree(this.pokemons.map(p => {
+    update(): void {
+        this.pokemonTree = quadtree(this.container.pokemons.map(p => {
             return {
                 x: p.position.x,
                 y: p.position.y,
@@ -103,4 +95,17 @@ export class QuadTreePokemonContainer extends PokemonContainerBase {
             }
         }), d => d.x, d => d.y);
     };
+}
+
+export class RTreePokemonContainer implements GeographicContainer<Pokemon> {
+    private tree = new RBush();
+
+    getNearby(pokemon: Pokemon, radius: number): Pokemon[] {
+        return [];
+    }
+
+    update(): void {
+        this.tree.clear();
+
+    }
 }
