@@ -4,7 +4,7 @@ import {Biome} from "../../domain/model/biome";
 
 export class BiomeView extends Graphics {
     constructor(biome: Biome) {
-        super();
+        super({interactive: true});
 
         const drawablePolygon = biome.polygon.map(([y, x]) => ({x, y} as PointData));
         this.poly(drawablePolygon);

@@ -7,6 +7,11 @@ import {Dex} from '@pkmn/dex';
 import {Generations} from '@pkmn/data';
 
 const POKEMON_GEN = new Generations(Dex).get(9)
+POKEMON_GEN.learnsets.get('bulbasaur').then(
+    (learnset) => {
+        console.log(learnset)
+    }
+);
 
 const randomizer = randomUniform()
 
@@ -46,10 +51,11 @@ export class Pokedex {
 
         const pokedexEntry = this.getEntry(id)
         try {
+            const smogonPokemon = new SmogonPokemon(POKEMON_GEN.dex.gen, pokedexEntry["Pokemon"]);
             return {
                 id,
                 generalData: pokedexEntry,
-                battleData: new SmogonPokemon(POKEMON_GEN.dex.gen, toID(pokedexEntry["Pokemon"]))
+                battleData: smogonPokemon
             } as PokemonData
         } catch (e) {
             console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${id})`, e)

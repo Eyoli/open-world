@@ -28,38 +28,36 @@ export class WorldContainer {
         this.container = new Container({
             // this will make moving this container GPU powered
             isRenderGroup: true,
+            interactive: true
         });
-        this.backgroundLayer = new Container({interactiveChildren: false});
+        this.backgroundLayer = new Container({interactive: true});
         this.container.addChild(this.backgroundLayer);
 
-        this.itemLayer = new Container();
+        this.itemLayer = new Container({interactive: true});
         this.container.addChild(this.itemLayer);
 
         //this.container.addChild(this.collisionLayer);
 
         this.viewport = createAdminViewport(app, width, height);
+        //this.viewport.interactiveChildren = true;
 
         app.stage.addChild(this.viewport);
         this.viewport.addChild(this.container);
         this.viewport.moveCenter(this.world.center.x, this.world.center.y);
 
         this.ui = new UserInterface();
-        this.ui.position.set(10, 10);
         app.stage.addChild(this.ui);
+
+        this.viewport.on('pointerdown', (event) => {
+            world.center = this.viewport.toWorld({x: event.x, y: event.y});
+            this.renderChunks();
+        });
     }
 
     render = () => {
         const {world} = this;
 
         this.renderChunks();
-
-        this.viewport.on('pointerdown', (event) => {
-            world.center = this.viewport.toWorld({x: event.x, y: event.y});
-            this.renderChunks();
-
-            const biome = world.getBiomeAt(world.center);
-            this.ui.updateCurrentBiome(biome.name);
-        });
     }
 
     runEachFrame = () => {
@@ -69,6 +67,10 @@ export class WorldContainer {
             const pokemonSprite = createPokemonSprite(pokemon);
             this.pokemons.set(pokemon, pokemonSprite);
             this.itemLayer.addChild(pokemonSprite);
+
+            pokemonSprite.on('pointerdown', (event) => {
+                this.ui.updateCurrentPokemon(pokemon);
+            });
         }
 
         world.update()
@@ -94,6 +96,9 @@ export class WorldContainer {
     private renderBiomes(chunk: Chunk) {
         for (const biome of chunk.biomes) {
             const view = new BiomeView(biome);
+            view.on('pointerdown', (event) => {
+                this.ui.updateCurrentBiome(biome.name);
+            });
             this.backgroundLayer.addChild(view);
         }
     }

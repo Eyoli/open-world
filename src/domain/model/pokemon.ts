@@ -128,4 +128,16 @@ export class Pokemon {
     get directionVector() {
         return this._directionVector;
     }
+
+    get name() {
+        return this.data.battleData.name;
+    }
+
+    get hp() {
+        return this.data.battleData.curHP();
+    }
+
+    get stats(): { [stat: string]: number } {
+        return this.data.battleData.rawStats
+    }
 }

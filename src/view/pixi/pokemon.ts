@@ -11,7 +11,7 @@ export class PokemonSprite extends Sprite {
         private readonly sprites: Map<Direction, AnimatedSprite>,
         readonly pokemon: Pokemon
     ) {
-        super();
+        super({interactive: true});
         for (const sprite of this.sprites.values()) {
             this.addChild(sprite);
         }
