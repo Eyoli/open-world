@@ -137,6 +137,10 @@ export class Pokemon {
         return this.data.battleData.curHP();
     }
 
+    get level() {
+        return this.data.battleData.level;
+    }
+
     get stats(): { [stat: string]: number } {
         return this.data.battleData.rawStats
     }

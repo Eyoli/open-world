@@ -84,7 +84,7 @@ export const createPokemonSprite = (pokemon: Pokemon): PokemonSprite => {
     return new PokemonSprite(new Map(anim), pokemon);
 }
 
-const getPokemonTextures = (pokemon: Pokemon): [Direction, Texture[]][] => {
+export const getPokemonTextures = (pokemon: Pokemon): [Direction, Texture[]][] => {
     const id = pokemon.data.id.toString().padStart(3, '0')
     return [
         [Direction.DOWN, loadTextures([`o-b_hs_${id}_1.png`, `o-b_hs_${id}_2.png`])],

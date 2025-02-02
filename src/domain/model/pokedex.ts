@@ -1,10 +1,11 @@
 import {csv} from 'd3-fetch'
 import {PokemonConfig} from "./config";
 import {randomUniform} from "../utils/random";
-import {Pokemon as SmogonPokemon, toID} from "@smogon/calc";
+import {Pokemon as SmogonPokemon} from "@smogon/calc";
 import {Biome} from "./biome";
 import {Dex} from '@pkmn/dex';
 import {Generations} from '@pkmn/data';
+import {randomNormal} from "d3-random";
 
 const POKEMON_GEN = new Generations(Dex).get(9)
 POKEMON_GEN.learnsets.get('bulbasaur').then(
@@ -28,6 +29,11 @@ const randomPokemon = (biome: Biome) => {
     }).id
 }
 
+const randomLevel = (biome: Biome) => {
+    const generator = randomNormal(25, 20 / 3)
+    return Math.min(100, Math.max(1, Math.round(generator())))
+}
+
 export type PokemonData = {
     id: number,
     generalData: any,
@@ -47,11 +53,12 @@ export class Pokedex {
 
     generateRandomPokemon(biome: Biome) {
         const id = randomPokemon(biome)
+        const level = randomLevel(biome)
         if (!id) return null
 
         const pokedexEntry = this.getEntry(id)
         try {
-            const smogonPokemon = new SmogonPokemon(POKEMON_GEN.dex.gen, pokedexEntry["Pokemon"]);
+            const smogonPokemon = new SmogonPokemon(POKEMON_GEN.dex.gen, pokedexEntry["Pokemon"], {level});
             return {
                 id,
                 generalData: pokedexEntry,
@@ -66,7 +73,6 @@ export class Pokedex {
 }
 
 export const loadNationalPokedex = async () => {
-    console.log(POKEMON_GEN.species.get(toID('bulbasaur')))
     const data: [p: string, value: any][] = (await csv('dist/pokemon-national-dex.csv'))
         .map((row, i) => [row["Nat"], row])
     return new Pokedex(new Map(data))
