@@ -79,7 +79,7 @@ class Panel extends Container {
 class PokemonPanel extends Container {
     private readonly layout = new Panel({type: "horizontal", padding: 10, color: "white", alpha: 0.7});
     private readonly leftPanel = new Panel({type: "vertical", width: 150, color: "white", alpha: 0});
-    private readonly rightPanel = new Panel({type: "vertical", width: 220, color: "white", alpha: 0});
+    private readonly rightPanel = new Panel({type: "vertical", width: 200, color: "white", alpha: 0});
     private readonly image: Sprite
     private readonly pName: Text
     private readonly level: Text

@@ -63,15 +63,16 @@ export class WorldContainer {
     runEachFrame = () => {
         const {world} = this;
 
-        for (const pokemon of world.addPokemon()) {
+        world.addPokemon((pokemon) => {
             const pokemonSprite = createPokemonSprite(pokemon);
+            pokemonSprite.update();
             this.pokemons.set(pokemon, pokemonSprite);
             this.itemLayer.addChild(pokemonSprite);
 
             pokemonSprite.on('pointerdown', (event) => {
                 this.ui.updateCurrentPokemon(pokemon);
             });
-        }
+        })
 
         world.update()
 

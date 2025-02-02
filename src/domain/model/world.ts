@@ -1,4 +1,4 @@
-import {Direction, Position} from "./types";
+import {Position} from "./types";
 import {WorldConfig} from "./config";
 import {ChunksHolder} from "./chunk";
 import {Pokedex} from "./pokedex";
@@ -30,19 +30,20 @@ export class World {
         return this.geographicContainer.getNearby(pokemon, radius);
     }
 
-    addPokemon() {
-        const {positionGenerator} = this;
+    addPokemon(callback: (pokemon: Pokemon) => void) {
+        const {positionGenerator, pokedex} = this;
 
-        const added: Pokemon[] = [];
         if (this.pokemonContainer.isNotFull()) {
             const position = {x: this.center.x + positionGenerator(), y: this.center.y + positionGenerator()};
-            const pokemon = this.generatePokemonAt(position)
-            if (pokemon) {
-                added.push(pokemon);
+            const biome = this.getBiomeAt(position);
+
+            if (biome) {
+                pokedex.generateRandomPokemon(position, biome, (pokemon) => {
+                    this.pokemonContainer.add(pokemon);
+                    callback(pokemon);
+                });
             }
         }
-        this.pokemonContainer.add(...added);
-        return added;
     }
 
     update() {
@@ -74,17 +75,5 @@ export class World {
 
     set center(center) {
         this._center = center;
-    }
-
-    private generatePokemonAt(position: Position) {
-        const {pokedex} = this
-
-        const biome = this.getBiomeAt(position);
-        if (!biome) return null;
-
-        const pokemonData = pokedex.generateRandomPokemon(biome);
-        if (!pokemonData) return null;
-
-        return new Pokemon(pokemonData, position, Direction.UP);
     }
 }

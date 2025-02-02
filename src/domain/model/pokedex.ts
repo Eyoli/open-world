@@ -6,6 +6,8 @@ import {Biome} from "./biome";
 import {Dex} from '@pkmn/dex';
 import {Generations} from '@pkmn/data';
 import {randomNormal} from "d3-random";
+import {Direction, Position} from "./types";
+import {Pokemon} from "./pokemon";
 
 const POKEMON_GEN = new Generations(Dex).get(9)
 POKEMON_GEN.learnsets.get('bulbasaur').then(
@@ -51,25 +53,42 @@ export class Pokedex {
         return this.data.get(id.toString())
     }
 
-    generateRandomPokemon(biome: Biome) {
+    generateRandomPokemon(position: Position, biome: Biome, callback: (pokemon: Pokemon) => void): Pokemon {
         const id = randomPokemon(biome)
         const level = randomLevel(biome)
         if (!id) return null
 
         const pokedexEntry = this.getEntry(id)
-        try {
-            const smogonPokemon = new SmogonPokemon(POKEMON_GEN.dex.gen, pokedexEntry["Pokemon"], {level});
-            return {
-                id,
-                generalData: pokedexEntry,
-                battleData: smogonPokemon
-            } as PokemonData
-        } catch (e) {
-            console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${id})`, e)
-        }
+        loadAvailableMoves(pokedexEntry["Pokemon"], level)
+            .then((moves) => {
+                console.log(pokedexEntry["Pokemon"], moves)
 
-        return null
+                const smogonPokemon = new SmogonPokemon(POKEMON_GEN.dex.gen, pokedexEntry["Pokemon"], {
+                    level,
+                    moves: moves.map(({move}) => move)
+                });
+                const pokemonData = {
+                    id,
+                    generalData: pokedexEntry,
+                    battleData: smogonPokemon
+                } as PokemonData
+                callback(new Pokemon(pokemonData, position, Direction.UP));
+            })
+            .catch((e) => {
+                console.error(`Error generating pokemon ${pokedexEntry["Pokemon"]} (${id})`, e)
+            })
     }
+}
+
+const loadAvailableMoves = async (id: string, maxLevel: number) => {
+    const learnset = await POKEMON_GEN.learnsets.get(id)
+    return Object.entries(learnset.learnset)
+        .map(([move, conditions]) => {
+            const level = conditions
+                .find((condition) => condition.split(`${POKEMON_GEN.dex.gen}L`).length > 1)
+            return {move, level: level && parseInt(level.split(`${POKEMON_GEN.dex.gen}L`)[1])}
+        })
+        .filter(({level}) => level && level <= maxLevel)
 }
 
 export const loadNationalPokedex = async () => {
