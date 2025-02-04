@@ -1,4 +1,4 @@
-import {Result} from "@smogon/calc";
+import {calculate, Move, Result} from "@smogon/calc";
 import {IdleState, PokemonState} from "./states";
 import {Direction, Position} from "./types";
 import {PokemonData} from "./pokedex";
@@ -21,7 +21,7 @@ export class Pokemon {
     readonly speed = 3;
 
     constructor(
-        readonly data: PokemonData,
+        private readonly data: PokemonData,
         private _position: Position,
         private _direction: Direction
     ) {
@@ -133,8 +133,16 @@ export class Pokemon {
         return this.data.battleData.name;
     }
 
+    get id() {
+        return this.data.id;
+    }
+
     get hp() {
         return this.data.battleData.curHP();
+    }
+
+    get maxHp() {
+        return this.data.battleData.maxHP();
     }
 
     get level() {
@@ -143,5 +151,17 @@ export class Pokemon {
 
     get stats(): { [stat: string]: number } {
         return this.data.battleData.rawStats
+    }
+
+    attack() {
+        const gen = this.data.battleData.gen
+        const result = calculate(
+            gen,
+            this.data.battleData,
+            this.target.data.battleData,
+            new Move(gen, 'Aurora Beam')
+        );
+        this.attacked(result)
+        this.target.defended(result)
     }
 }

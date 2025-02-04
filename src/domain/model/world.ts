@@ -38,10 +38,16 @@ export class World {
             const biome = this.getBiomeAt(position);
 
             if (biome) {
-                pokedex.generateRandomPokemon(position, biome, (pokemon) => {
-                    this.pokemonContainer.add(pokemon);
-                    callback(pokemon);
-                });
+                pokedex.generateRandomPokemon(position, biome)
+                    .then(
+                        (pokemon) => {
+                            console.log(`Generated pokemon`, pokemon);
+                            this.pokemonContainer.add(pokemon);
+                            callback(pokemon);
+                        },
+                        (e) => {
+                            console.error(`Error generating pokemon`, e)
+                        });
             }
         }
     }

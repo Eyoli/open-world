@@ -1,4 +1,3 @@
-import {calculate, Move} from "@smogon/calc";
 import {Pokemon} from "./pokemon";
 import {randomDirection, randomInt} from "../utils/random";
 import {World} from "./world";
@@ -58,22 +57,10 @@ export class AttackingState extends PokemonState {
             return this
         } else if (this.lastAttack > 30) {
             this.lastAttack = 0
-            this.attack(pokemon)
+            pokemon.attack()
             return this
         }
         this.lastAttack++;
         return this;
-    }
-
-    attack(pokemon: Pokemon) {
-        const gen = pokemon.data.battleData.gen
-        const result = calculate(
-            gen,
-            pokemon.data.battleData,
-            pokemon.target.data.battleData,
-            new Move(gen, 'Aurora Beam')
-        );
-        pokemon.attacked(result)
-        pokemon.target.defended(result)
     }
 }

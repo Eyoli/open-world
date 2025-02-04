@@ -55,7 +55,7 @@ export class PokemonSprite extends Sprite {
     private updateHpBar = () => {
         const spriteHeight = this.sprites.get(Direction.UP).texture.trim?.height || this.sprites.get(Direction.UP).height;
         this.hpBar.clear()
-        const hpWidth = 32 * (this.pokemon.data.battleData.curHP() / this.pokemon.data.battleData.maxHP());
+        const hpWidth = 32 * (this.pokemon.hp / this.pokemon.maxHp);
         this.hpBar.rect(-16, spriteHeight + 17, hpWidth, 4);
         this.hpBar.fill("#40ff00");
         this.hpBar.rect(-16 + hpWidth, spriteHeight + 17, 32 - hpWidth, 4);
@@ -85,7 +85,7 @@ export const createPokemonSprite = (pokemon: Pokemon): PokemonSprite => {
 }
 
 export const getPokemonTextures = (pokemon: Pokemon): [Direction, Texture[]][] => {
-    const id = pokemon.data.id.toString().padStart(3, '0')
+    const id = pokemon.id.toString().padStart(3, '0')
     return [
         [Direction.DOWN, loadTextures([`o-b_hs_${id}_1.png`, `o-b_hs_${id}_2.png`])],
         [Direction.UP, loadTextures([`o_hs_${id}_1.png`, `o_hs_${id}_2.png`])],
